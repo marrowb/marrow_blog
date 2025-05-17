@@ -11,12 +11,21 @@ x-app: &default-app
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
   stop_grace_period: "3s"
   tty: true
-  volumes:
-    - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
-    - "sqlite_data:/app/data"
-
 
 services:
+  dev:
+    <<: *default-app
+    develop:
+      watch:
+        - action: sync
+          path: ./assets/static/
+          target: /app/public
+    ports:
+      - "${DOCKER_WEB_PORT_FORWARD:-127.0.0.1:8000}:${PORT:-8000}"
+    volumes:
+      - "sqlite_data:/app/data"
+    profiles: ["dev"]
+
   web:
     <<: *default-app
     deploy:
@@ -32,6 +41,9 @@ services:
       retries: 3
     ports:
       - "${DOCKER_WEB_PORT_FORWARD:-127.0.0.1:8000}:${PORT:-8000}"
+    volumes:
+      - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
+      - "sqlite_data:/app/data"
     profiles: ["web"]
 
   worker:
@@ -43,6 +55,9 @@ services:
         limits:
           cpus: "${DOCKER_WORKER_CPUS:-0}"
           memory: "${DOCKER_WORKER_MEMORY:-0}"
+    volumes:
+      - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
+      - "sqlite_data:/app/data"
     profiles: ["worker"]
 
 volumes:
