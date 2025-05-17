@@ -66,6 +66,14 @@ COPY --chown=python:python --from=app-build /home/python/.local /home/python/.lo
 COPY --from=app-build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 COPY --chown=python:python . .
 
+USER root
+RUN mkdir -p /public && chown python:python /public
+USER python 
+
+COPY --chown=python:python . .
+
+RUN cp -r /app/assets/static/* /public/
+
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
   ln -s /public /app/public && SECRET_KEY=dummy flask digest compile && rm -rf /app/public; fi
 
