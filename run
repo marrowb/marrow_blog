@@ -116,25 +116,12 @@ shell() {
   cmd bash "${@}"
 }
 
-psql() {
-  # Connect to PostgreSQL
-  # shellcheck disable=SC1091
-  . .env
-  _dc postgres psql -U "${POSTGRES_USER}" "${@}"
-}
-
-redis-cli() {
-  # Connect to Redis
-  _dc redis redis-cli "${@}"
-}
-
 deps:install() {
   # Install back-end and / or front-end dependencies
   local no_build="${1:-}"
 
   [ -z "${no_build}" ] && docker compose down && docker compose build
 
-  _dc_run js yarn install
   _dc_run web bin/uv-install
 }
 
@@ -146,36 +133,6 @@ uv() {
 uv:outdated() {
   # List any installed packages that are outdated
   _dc_run web uv tree --outdated --depth 1 "${@}"
-}
-
-yarn() {
-  # Run any yarn commands
-  _dc js yarn "${@}"
-}
-
-yarn:outdated() {
-  # List any installed packages that are outdated
-  _dc_run js yarn outdated
-}
-
-yarn:build:js() {
-  # Build JS assets, this is meant to be run from within the assets container
-  mkdir -p ../public/js
-  node esbuild.config.mjs
-}
-
-yarn:build:css() {
-  # Build CSS assets, this is meant to be run from within the assets container
-  local args=()
-
-  if [ "${NODE_ENV:-}" == "production" ]; then
-    args=(--minify)
-  else
-    args=(--watch)
-  fi
-
-  mkdir -p ../public/css
-  tailwindcss -i css/app.css -o ../public/css/app.css "${args[@]}"
 }
 
 clean() {
@@ -207,9 +164,6 @@ ci:test() {
 
   # shellcheck disable=SC1091
   . .env
-  wait-until "docker compose exec -T \
-    -e PGPASSWORD=${POSTGRES_PASSWORD} postgres \
-    psql -U ${POSTGRES_USER} ${POSTGRES_USER} -c 'SELECT 1'"
 
   docker compose logs
 
