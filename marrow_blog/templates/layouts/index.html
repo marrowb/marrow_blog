@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            {% block title %}{% endblock %}
+        </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet"
+              href="{{ static_url_for('static', filename='index.css') }}">
+    </head>
+    <body>
+        <noscript><strong>Please enable JavaScript to view this page correctly.</strong></noscript>
+        <header>
+            title and navigation ...
+        </header>
+        <main>
+            main content ...
+        </main>
+        <footer>
+            byline and copyright ...
+        </footer>
+        <script type="module"
+                src="{{ static_url_for('static', filename='index.js') }}"></script>
+    </body>
+</html>
