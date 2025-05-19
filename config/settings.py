@@ -9,7 +9,7 @@ SERVER_NAME = os.getenv(
     "SERVER_NAME", "localhost:{0}".format(os.getenv("PORT", "8000"))
 )
 # SQLAlchemy.
-SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///data/marrow_blog.db")
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:////app/data/marrow_blog.db")
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
