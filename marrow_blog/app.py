@@ -3,13 +3,13 @@ from flask import Flask
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from marrow_blog.admin.models import AdminUser
-from marrow_blog.admin import admin_bp as admin_blueprint
-from marrow_blog.cli.commands.cmd_admin import init_app as init_admin_cli
+from marrow_blog.blueprints.admin.models import AdminUser
+from cli.commands.cmd_admin import init_app as init_admin_cli
 
 from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager
-from marrow_blog.page.views import page
-from marrow_blog.up.views import up
+from marrow_blog.blueprints.page import page
+from marrow_blog.blueprints.up import up
+from marrow_blog.blueprints.admin import admin
 
 
 def create_celery_app(app=None):
@@ -51,9 +51,12 @@ def create_app(settings_override=None):
 
     middleware(app)
 
+    if app.debug:
+        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+
     app.register_blueprint(up)
     app.register_blueprint(page)
-    app.register_blueprint(admin_blueprint)
+    app.register_blueprint(admin)
 
     extensions(app)
     authentication(app, AdminUser)

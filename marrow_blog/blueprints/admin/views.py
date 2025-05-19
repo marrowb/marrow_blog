@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import current_app
 from flask_login import login_user, logout_user, login_required, current_user
 import pyotp # Uncomment if you implement pyotp for MFA
 
@@ -6,9 +7,9 @@ from .forms import LoginForm
 from .models import AdminUser
 from marrow_blog.extensions import db
 
-admin_bp = Blueprint("admin", __name__, template_folder="../templates/admin", url_prefix="/admin")
+admin = Blueprint("admin", __name__, template_folder="templates")
 
-@admin_bp.route("/login", methods=["GET", "POST"])
+@admin.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("admin.dashboard"))
@@ -20,6 +21,7 @@ def login():
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
                     return render_template("login.html", form=form, title="Admin Login")
+                raise
                 totp = pyotp.TOTP(user.mfa_secret) # Uncomment for pyotp
                 if not totp.verify(form.token.data):
                     flash("Invalid MFA token.", "error")
@@ -33,14 +35,14 @@ def login():
             flash("Invalid username or password.", "error")
     return render_template("login.html", form=form, title="Admin Login")
 
-@admin_bp.route("/logout")
+@admin.route("/logout")
 @login_required
 def logout():
     logout_user()
     flash("You have been logged out.", "info")
     return redirect(url_for("admin.login"))
 
-@admin_bp.route("/dashboard")
+@admin.route("/dashboard")
 @login_required
 def dashboard():
     return render_template("dashboard.html", title="Admin Dashboard")
