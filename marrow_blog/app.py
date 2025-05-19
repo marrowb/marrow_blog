@@ -3,7 +3,11 @@ from flask import Flask
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from marrow_blog.extensions import db, debug_toolbar, flask_static_digest
+from marrow_blog.admin.models import AdminUser
+from marrow_blog.admin import admin_bp as admin_blueprint
+from marrow_blog.cli.commands.cmd_admin import init_app as init_admin_cli
+
+from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager
 from marrow_blog.page.views import page
 from marrow_blog.up.views import up
 
@@ -49,8 +53,11 @@ def create_app(settings_override=None):
 
     app.register_blueprint(up)
     app.register_blueprint(page)
+    app.register_blueprint(admin_blueprint)
 
     extensions(app)
+    authentication(app, AdminUser)
+    init_admin_cli(app)
 
     return app
 
@@ -65,7 +72,18 @@ def extensions(app):
     debug_toolbar.init_app(app)
     db.init_app(app)
     flask_static_digest.init_app(app)
+    login_manager.init_app(app)
+    return None
 
+
+def authentication(app, user_model):
+    login_manager.login_view = "admin.login"
+    login_manager.login_message_category = "info"
+    login_manager.login_message = "Please log in to access this page."
+
+    @login_manager.user_loader
+    def load_user(uid):
+        return user_model.query.get(int(uid))
     return None
 
 

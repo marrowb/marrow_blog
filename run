@@ -37,6 +37,11 @@ flask() {
   cmd flask "${@}"
 }
 
+admin() {
+  # Run any Flask admin commands
+  cmd flask admin "${@}"
+}
+
 lint:dockerfile() {
   # Lint Dockerfile
   docker container run --rm -i \
