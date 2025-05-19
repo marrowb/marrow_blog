@@ -48,7 +48,8 @@ RUN apt-get update \
   && apt-get clean \
   && groupadd -g "${GID}" python \
   && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python \
-  && chown python:python -R /app
+  && chown python:python -R /app \
+  && mkdir -p /public && chown python:python -R /public
 
 USER python
 
@@ -62,17 +63,13 @@ ENV FLASK_DEBUG="${FLASK_DEBUG}" \
   PATH="${PATH}:/home/python/.local/bin" \
   USER="python"
 
+COPY --chown=python:python ./assets/static /app/public
+
 COPY --chown=python:python --from=app-build /home/python/.local /home/python/.local
 COPY --from=app-build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 COPY --chown=python:python . .
 
-USER root
-RUN mkdir -p /public && chown python:python /public
-USER python 
 
-COPY --chown=python:python . .
-
-RUN cp -r /app/assets/static/* /public/
 
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
   ln -s /public /app/public && SECRET_KEY=dummy flask digest compile && rm -rf /app/public; fi
