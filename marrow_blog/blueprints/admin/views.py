@@ -21,7 +21,6 @@ def login():
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
                     return render_template("login.html", form=form, title="Admin Login")
-                raise
                 totp = pyotp.TOTP(user.mfa_secret) # Uncomment for pyotp
                 if not totp.verify(form.token.data):
                     flash("Invalid MFA token.", "error")
