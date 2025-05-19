@@ -2,7 +2,7 @@ import click
 from flask.cli import AppGroup
 import pyotp # Uncomment if using pyotp for MFA
 
-from marrow_blog.admin.models import AdminUser
+from marrow_blog.blueprints.admin.models import AdminUser
 from marrow_blog.extensions import db
 
 admin_cli = AppGroup("admin", help="Manage admin users.")
