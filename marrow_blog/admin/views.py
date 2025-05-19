@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
-# import pyotp # Uncomment if you implement pyotp for MFA
+import pyotp # Uncomment if you implement pyotp for MFA
 
 from .forms import LoginForm
 from .models import AdminUser
@@ -20,11 +20,11 @@ def login():
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
                     return render_template("login.html", form=form, title="Admin Login")
-                # totp = pyotp.TOTP(user.mfa_secret) # Uncomment for pyotp
-                # if not totp.verify(form.token.data):
-                #     flash("Invalid MFA token.", "error")
-                #     return render_template("login.html", form=form, title="Admin Login")
-                flash("MFA check placeholder: Successful (if token was provided and valid).", "info") # Placeholder
+                totp = pyotp.TOTP(user.mfa_secret) # Uncomment for pyotp
+                if not totp.verify(form.token.data):
+                    flash("Invalid MFA token.", "error")
+                    return render_template("login.html", form=form, title="Admin Login")
+                # flash("MFA check placeholder: Successful (if token was provided and valid).", "info") # Placeholder
 
             login_user(user)
             flash("Logged in successfully.", "success")

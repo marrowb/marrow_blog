@@ -1,6 +1,6 @@
 import click
 from flask.cli import AppGroup
-# import pyotp # Uncomment if using pyotp for MFA
+import pyotp # Uncomment if using pyotp for MFA
 
 from marrow_blog.admin.models import AdminUser
 from marrow_blog.extensions import db
@@ -24,16 +24,16 @@ def create_admin(username, password, enable_mfa):
     user.set_password(password)
 
     if enable_mfa:
-        # user.mfa_secret = pyotp.random_base32() # Uncomment for pyotp
-        # provisioning_uri = pyotp.TOTP(user.mfa_secret).provisioning_uri(
-        #     name=user.username, issuer_name="MarrowBlog"
-        # )
-        # click.echo(f"MFA enabled for {username}.")
-        # click.echo(f"Scan this QR code with your authenticator app (or enter secret manually):")
-        # click.echo(f"Secret: {user.mfa_secret}")
-        # click.echo(f"URI: {provisioning_uri}") # You might want to use a QR code library to display this
-        user.mfa_secret = "PLACEHOLDER_MFA_SECRET" # Placeholder
-        click.echo(f"MFA enabled for {username}. (Placeholder secret: {user.mfa_secret})")
+        user.mfa_secret = pyotp.random_base32() # Uncomment for pyotp
+        provisioning_uri = pyotp.TOTP(user.mfa_secret).provisioning_uri(
+            name=user.username, issuer_name="MarrowBlog"
+        )
+        click.echo(f"MFA enabled for {username}.")
+        click.echo(f"Scan this QR code with your authenticator app (or enter secret manually):")
+        click.echo(f"Secret: {user.mfa_secret}")
+        click.echo(f"URI: {provisioning_uri}") # You might want to use a QR code library to display this
+        # user.mfa_secret = "PLACEHOLDER_MFA_SECRET" # Placeholder
+        # click.echo(f"MFA enabled for {username}. (Placeholder secret: {user.mfa_secret})")
     else:
         user.mfa_secret = None
         click.echo(f"MFA disabled for {username}.")
