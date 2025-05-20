@@ -8,6 +8,7 @@
         <meta name="viewport" content="width=device-width" />
         <link rel="stylesheet"
               href="{{ static_url_for('static', filename='index.css') }}">
+        {% block head_scripts %}{% endblock %}
     </head>
     <body>
         <noscript><strong>Please enable JavaScript to view this page correctly.</strong></noscript>
