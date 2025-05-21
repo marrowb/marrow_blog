@@ -1,10 +1,8 @@
 from marshmallow import fields, validate
 from marrow_blog.extensions import marshmallow
-from marrow_blog.blueprints.posts.models import Post # Import Post model
+from marrow_blog.blueprints.posts.models import Post
 
 class PostSchema(marshmallow.Schema):
-    author_username = fields.Method("get_author_username", dump_only=True)
-
     class Meta:
         fields = (
             'id',
@@ -25,8 +23,8 @@ class PostSchema(marshmallow.Schema):
 
 class CreateOrUpdatePostSchema(marshmallow.Schema):
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
-    markdown_content = fields.Str(allow_none=True, missing="")
-    published = fields.Bool(missing=False)
+    markdown_content = fields.Str(allow_none=True, load_default="")
+    published = fields.Bool(load_default=False)
 
 post_schema = PostSchema()
 posts_schema = PostSchema(many=True)

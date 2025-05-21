@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from marrow_blog.extensions import db
 from marrow_blog.blueprints.api.v1 import V1FlaskView
 from marrow_blog.blueprints.posts.models import Post 
-from marrow_blog.schemas.post_schemas import ( 
+from marrow_blog.blueprints.posts.schemas import ( 
     post_schema,
     posts_schema,
     create_post_schema,
