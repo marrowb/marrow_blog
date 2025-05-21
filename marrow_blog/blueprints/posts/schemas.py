@@ -3,6 +3,7 @@ from marrow_blog.extensions import marshmallow
 from marrow_blog.blueprints.posts.models import Post
 
 class PostSchema(marshmallow.Schema):
+    author_username = fields.Method("get_author_username")
     class Meta:
         fields = (
             'id',
