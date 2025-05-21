@@ -10,6 +10,8 @@ from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login
 from marrow_blog.blueprints.page import page
 from marrow_blog.blueprints.up import up
 from marrow_blog.blueprints.admin import admin
+from marrow_blog.blueprints.api.views import api as api_blueprint # Import the api blueprint
+from marrow_blog.blueprints.api.v1.post_views import PostView # Add this import
 
 
 def create_celery_app(app=None):
@@ -51,12 +53,17 @@ def create_app(settings_override=None):
 
     middleware(app)
 
-    if app.debug:
-        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+    # Removed redundant DebuggedApplication wrapper, it's in middleware(app)
+    # if app.debug:
+    #     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
     app.register_blueprint(up)
     app.register_blueprint(page)
     app.register_blueprint(admin)
+    app.register_blueprint(api_blueprint) # Register the main /api blueprint
+
+    # Register your new PostView directly to the app for /api/v1/post routes
+    PostView.register(app) # Add this line
 
     extensions(app)
     authentication(app, AdminUser)
