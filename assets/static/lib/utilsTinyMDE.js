@@ -38,7 +38,7 @@ export const initializeTinyMDE = () => {
     if (currentPostId) {
       loadPost(currentPostId, editor);
     }
-    
+
     // Set up image drop handling
     setupImageDropHandling(editor);
   }
@@ -227,15 +227,19 @@ const updatePublishedAndModified = (published, lastModifiedAt) => {
 };
 
 const setupImageDropHandling = (editor) => {
-  editor.addEventListener("drop", function(event) {
+  editor.addEventListener("drop", function (event) {
     // Check if there are files in the drop
-    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+    if (
+      event.dataTransfer &&
+      event.dataTransfer.files &&
+      event.dataTransfer.files.length > 0
+    ) {
       const files = event.dataTransfer.files;
-      
+
       // Check if any of the files are images
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        if (file.type.startsWith('image/')) {
+        if (file.type.startsWith("image/")) {
           uploadAndInsertImage(file, editor);
         }
       }
@@ -245,34 +249,93 @@ const setupImageDropHandling = (editor) => {
 
 const uploadAndInsertImage = (file, editor) => {
   updateStatusMessage("Uploading image...");
-  
+
   const formData = new FormData();
-  formData.append('image', file);
-  
-  fetch('/api/v1/upload', {
-    method: 'POST',
-    credentials: 'include',
-    body: formData
+  formData.append("image", file);
+
+  fetch("/api/v1/upload", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.path) {
-      // Insert markdown image at cursor position
-      const imageName = file.name.split('.')[0]; // Use filename as alt text
-      const markdownImage = `![${imageName}](${data.path})`;
-      
-      // Get current selection and insert the markdown
-      const selection = editor.getSelection();
-      if (selection) {
-        editor.paste(markdownImage, selection, selection);
-        updateStatusMessage("Image uploaded");
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.path) {
+        // Insert markdown image at cursor position
+        const imageName = file.name.split(".")[0]; // Use filename as alt text
+        const markdownImage = `![${imageName}](${data.path})`;
+
+        // Get current selection and insert the markdown
+        const selection = editor.getSelection();
+        if (selection) {
+          editor.paste(markdownImage, selection, selection);
+          updateStatusMessage("Image uploaded");
+        }
+      } else {
+        updateStatusMessage(
+          "Upload failed: " + (data.error || "Unknown error"),
+        );
       }
-    } else {
-      updateStatusMessage("Upload failed: " + (data.error || "Unknown error"));
-    }
-  })
-  .catch(error => {
-    console.error("Upload error:", error);
-    updateStatusMessage("Upload failed");
-  });
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+      updateStatusMessage("Upload failed");
+    });
 };
+
+//const uploadAndInsertImage = (file, editor) => {
+//  updateStatusMessage("Uploading image...");
+//
+//  const formData = new FormData();
+//  formData.append("image", file);
+//
+//  // Add a timeout to the fetch request
+//  const controller = new AbortController();
+//  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+//
+//  fetch("/api/v1/upload", {
+//    method: "POST",
+//    credentials: "include",
+//    body: formData,
+//    signal: controller.signal,
+//  })
+//    .then((response) => {
+//      clearTimeout(timeoutId);
+//      if (!response.ok) {
+//        throw new Error(`Server responded with ${response.status}`);
+//      }
+//      return response.json();
+//    })
+//    .then((data) => {
+//      if (data.path) {
+//        // Insert markdown image at cursor position
+//        const imageName = file.name.split(".")[0]; // Use filename as alt text
+//        const markdownImage = `![${imageName}](${data.path})`;
+//
+//        // Get current selection and insert the markdown
+//        const selection = editor.getSelection();
+//        if (selection) {
+//          editor.paste(markdownImage, selection, selection);
+//          updateStatusMessage("Image uploaded");
+//        }
+//      } else {
+//        updateStatusMessage(
+//          "Upload failed: " + (data.error || "Unknown error"),
+//        );
+//      }
+//    })
+//    .catch((error) => {
+//      clearTimeout(timeoutId);
+//      console.error("Upload error:", error);
+//      if (error.name === "AbortError") {
+//        updateStatusMessage("Upload timed out - image may be too large");
+//      } else if (
+//        error.message &&
+//        error.message.includes("NS_ERROR_NET_RESET")
+//      ) {
+//        updateStatusMessage("Connection reset - please try again");
+//      } else {
+//        updateStatusMessage("Upload failed");
+//      }
+//    });
+//};
