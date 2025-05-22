@@ -4,18 +4,18 @@ let currentPostId = null;
 export const initializeTinyMDE = () => {
   const editorHostElement = document.getElementById("editor");
   const commandBarHostElement = document.getElementById("tinymde-commandbar");
-  
+
   // Check URL for post ID
   const urlParams = new URLSearchParams(window.location.search);
-  currentPostId = urlParams.get('id');
-  
+  currentPostId = urlParams.get("id");
+
   if (editorHostElement && window.TinyMDE) {
     const editor = setupEditor(editorHostElement);
-    
+
     if (commandBarHostElement) {
       setupCommandBar(commandBarHostElement, editor);
     }
-    
+
     // If we have a post ID, load the post content
     if (currentPostId) {
       loadPost(currentPostId, editor);
@@ -26,67 +26,75 @@ export const initializeTinyMDE = () => {
 const setupEditor = (editorHostElement) => {
   const editor = new window.TinyMDE.Editor({ element: editorHostElement });
   const titleInput = document.getElementById("post-title");
-  
-  editor.addEventListener("change", function() {
+
+  editor.addEventListener("change", function () {
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
-    
+
     saveTimeout = setTimeout(() => {
       const title = titleInput ? titleInput.value : "";
       savePost(editor.getContent(), title, false, currentPostId);
     }, 10000);
   });
-  
+
   if (titleInput) {
-    titleInput.addEventListener("input", function() {
+    titleInput.addEventListener("input", function () {
       if (saveTimeout) {
         clearTimeout(saveTimeout);
       }
-      
+
       saveTimeout = setTimeout(() => {
         savePost(editor.getContent(), titleInput.value, false, currentPostId);
       }, 10000);
     });
   }
-  
+
   return editor;
 };
 
 const setupCommandBar = (commandBarHostElement, editor) => {
-  const statusElement = document.createElement('span');
-  statusElement.id = 'editor-status';
-  statusElement.style.marginLeft = '10px';
-  commandBarHostElement.appendChild(statusElement);
-  
   return new window.TinyMDE.CommandBar({
     element: commandBarHostElement,
     editor: editor,
     commands: [
-      'bold', 'italic', 'strikethrough', '|', 
-      'code', '|', 
-      'h1', 'h2', '|', 
-      'ul', 'ol', '|', 
-      'blockquote', 'hr', '|', 
-      'insertLink', 'insertImage', '|',
+      "bold",
+      "italic",
+      "strikethrough",
+      "|",
+      "code",
+      "|",
+      "h1",
+      "h2",
+      "|",
+      "ul",
+      "ol",
+      "|",
+      "blockquote",
+      "hr",
+      "|",
+      "insertLink",
+      "insertImage",
+      "|",
       {
-        name: 'publish',
-        title: 'Publish Post',
+        name: "publish",
+        title: "Publish Post",
         innerHTML: `<svg height="18" width="18"><path d="M5 3v10h8V3H5zm1 1h6v8H6V4zm1 2h4v1H7V6zm0 2h4v1H7V8zm0 2h3v1H7v-1z" fill="currentColor"/></svg>`,
-        action: function() {
+        action: function () {
+          console.log("Publishing...");
           const title = document.getElementById("post-title").value;
           savePost(editor.getContent(), title, true, currentPostId);
         },
-        hotkey: 'Mod-Shift-P'
-      }
-    ]
+        hotkey: "Mod-Shift-P",
+      },
+    ],
   });
 };
 
 const loadPost = (postId, editor) => {
   fetch(`/api/v1/post/${postId}`, {
     credentials: "include",
-    method: "GET"
+    method: "GET",
   })
     .then((response) => response.json())
     .then((data) => {
@@ -94,31 +102,32 @@ const loadPost = (postId, editor) => {
       if (titleInput && data.title) {
         titleInput.value = data.title;
       }
-      
+
       if (data.markdown_content && editor) {
         editor.setContent(data.markdown_content);
       }
+      updatePublishedAndModified(data?.published, data?.updated_on);
     })
     .catch((error) => {
-      updateStatus("Error loading post");
+      updateStatusMessage("Error loading post");
     });
 };
 
 const savePost = (content, title, published = false, postID = null) => {
   if (!title) {
-    updateStatus("Title required");
+    updateStatusMessage("Title required");
     return;
   }
-  
-  updateStatus("Saving...");
-  
+
+  updateStatusMessage("Saving...");
+
   const method = postID ? "PATCH" : "POST";
   const url = postID ? `/api/v1/post/${postID}` : "/api/v1/post/";
-  
+
   const postData = {
     title: title,
     markdown_content: content,
-    published: published
+    published: published,
   };
 
   fetch(url, {
@@ -134,25 +143,35 @@ const savePost = (content, title, published = false, postID = null) => {
       if (!postID && data.id) {
         currentPostId = data.id;
         const newUrl = new URL(window.location);
-        newUrl.searchParams.set('id', data.id);
-        window.history.pushState({}, '', newUrl);
+        newUrl.searchParams.set("id", data.id);
+        window.history.pushState({}, "", newUrl);
       }
-      
-      updateStatus(published ? "Published" : "Saved");
+
+      updateStatusMessage(published ? "Published" : "Saved");
+      updatePublishedAndModified(data?.published, data?.updated_on);
     })
     .catch(() => {
-      updateStatus("Save failed");
+      updateStatusMessage("Save failed");
     });
 };
 
-const updateStatus = (message) => {
-  const statusElement = document.getElementById('editor-status');
-  if (statusElement) {
-    statusElement.textContent = message;
-    
+const updateStatusMessage = (message) => {
+  const statusMessage = document.getElementById("status-message");
+
+  if (statusMessage) {
+    statusMessage.textContent = message;
+
     // Clear status after 3 seconds
     setTimeout(() => {
-      statusElement.textContent = '';
+      statusMessage.textContent = "";
     }, 3000);
   }
+};
+
+const updatePublishedAndModified = (published, lastModifiedAt) => {
+  const statusPublished = document.getElementById("status-published");
+  const statusLastModified = document.getElementById("status-last-modified");
+  statusPublished.innerText = published ? "Published" : "Draft";
+  statusLastModified.innerText = lastModifiedAt ? lastModifiedAt : "";
+  return;
 };

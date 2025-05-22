@@ -5,8 +5,6 @@
           href="{{ static_url_for('static', filename='styles/tiny-mde.css') }}" />
     <script type="module"
             src="{{ static_url_for('static', filename='lib/tiny-mde.min.js') }}"></script>
-    <script type="module"
-            src="{{ static_url_for('static', filename='index.js') }}"></script>
 {% endblock %}
 {% block body %}
     <div>
@@ -16,7 +14,9 @@
                    placeholder="Post title..."
                    class="post-title-input">
         </h1>
-        <p>Welcome, {{ current_user.username }}!</p>
+        <span id="status-message"></span>
+        <span id="status-published"></span>
+        <span id="status-last-modified"></span>
         <p>
             <div id="tinymde-commandbar"></div>
             <div id="editor"></div>
