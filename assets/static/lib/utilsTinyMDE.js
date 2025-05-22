@@ -102,16 +102,18 @@ const setupCommandBar = (commandBarHostElement, editor) => {
           console.log("Publishing...");
           const title = document.getElementById("post-title").value;
           const content = editor.getContent();
-          
+
           // Save with the published flag directly in one request
           const method = currentPostId ? "PATCH" : "POST";
-          const url = currentPostId ? `/api/v1/post/${currentPostId}` : "/api/v1/post/";
-          
+          const url = currentPostId
+            ? `/api/v1/post/${currentPostId}`
+            : "/api/v1/post/";
+
           apiRequest(url, method, {
             title: title,
             markdown_content: content,
             published: true,
-            last_known_update: lastKnownUpdateTime
+            updated_on: lastKnownUpdateTime,
           });
         },
         hotkey: "Mod-Shift-P",
@@ -167,14 +169,16 @@ const savePost = (content, title, postID = null) => {
   const postData = {
     title: title,
     markdown_content: content,
-    last_known_update: lastKnownUpdateTime
+    updated_on: lastKnownUpdateTime,
   };
 
   apiRequest(url, method, postData)
     .then((response) => {
       if (response.status === 409) {
         // Conflict detected
-        updateStatusMessage("Post was modified elsewhere. Reload to see changes.");
+        updateStatusMessage(
+          "Post was modified elsewhere. Reload to see changes.",
+        );
         return Promise.reject("Conflict");
       }
       return response.json();
