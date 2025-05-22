@@ -9,10 +9,12 @@ from marrow_blog.blueprints.api.v1 import V1FlaskView
 
 class UploadView(V1FlaskView):
     route_base = '/upload'
+    trailing_slash = False
     
     @login_required
     def post(self):
         """Upload a file."""
+        print("In image upload endpoint...")
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
         

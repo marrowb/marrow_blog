@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from flask_classful import route
 from flask_login import current_user
+from marshmallow.exceptions import ValidationError
 
 from marrow_blog.extensions import db
 from marrow_blog.extensions import marshmallow
@@ -35,7 +36,7 @@ class PostView(V1FlaskView):
 
         try: 
             data = create_post_schema.load(json_data)
-        except marshmallow.ValidationError as err:
+        except ValidationError as err:
             return jsonify({'error': err.messages}), 422
 
         new_post = Post(
@@ -59,13 +60,13 @@ class PostView(V1FlaskView):
             return jsonify({'error': 'Invalid input'}), 400
 
         # Check for version conflict
-        last_known_update = json_data.get('last_known_update')
+        last_known_update = json_data.get('updated_on')
         if last_known_update and post.updated_on.isoformat() != last_known_update:
             return jsonify({'error': 'Post has been modified since last load'}), 409
 
         try: 
             data = update_post_schema.load(json_data, partial=True)
-        except marshmallow.ValidationError as err:
+        except ValidationError as err:
             return jsonify({'error': err.messages}), 422
 
         if 'title' in data:

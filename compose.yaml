@@ -15,6 +15,7 @@ x-app: &default-app
     - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
     - "${STATIC_MOUNT:-./assets/static:/app/public}"
     - "sqlite_data:/app/data"
+    - "uploads_data:/app/public/uploads"
 
 services:
   web:
@@ -32,11 +33,6 @@ services:
       retries: 3
     ports:
       - "${DOCKER_WEB_PORT_FORWARD:-127.0.0.1:8000}:${PORT:-8000}"
-    volumes:
-      - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
-      - "${STATIC_MOUNT:-./assets/static:/app/public}"
-      - "sqlite_data:/app/data"
-      - "uploads_data:/app/public/uploads"
     profiles: ["web"]
 
   worker:
