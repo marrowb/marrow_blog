@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block body %}
+    <article>
+        <h1>{{ post.title }}</h1>
+        <div class="meta">
+            <time datetime="{{ post.created_on.isoformat() }}">
+                {{ post.created_on.strftime("%B %d, %Y") }}
+            </time>
+            <span class="author">by {{ post.author.username }}</span>
+        </div>
+        <div class="content">{{ content|safe }}</div>
+    </article>
+{% endblock %}

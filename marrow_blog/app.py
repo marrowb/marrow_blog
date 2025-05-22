@@ -6,7 +6,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from marrow_blog.blueprints.admin.models import AdminUser
 from cli.commands.cmd_admin import init_app as init_admin_cli
 
-from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager, marshmallow
+from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager, marshmallow, flat_pages
 from marrow_blog.blueprints.page import page
 from marrow_blog.blueprints.up import up
 from marrow_blog.blueprints.admin import admin
@@ -84,6 +84,7 @@ def extensions(app):
     flask_static_digest.init_app(app)
     login_manager.init_app(app)
     marshmallow.init_app(app)
+    flat_pages.init_app(app)
     return None
 
 
