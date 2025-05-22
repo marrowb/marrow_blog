@@ -110,7 +110,8 @@ const setupCommandBar = (commandBarHostElement, editor) => {
           apiRequest(url, method, {
             title: title,
             markdown_content: content,
-            published: true
+            published: true,
+            last_known_update: lastKnownUpdateTime
           });
         },
         hotkey: "Mod-Shift-P",
