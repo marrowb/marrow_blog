@@ -73,7 +73,7 @@ COPY --chown=python:python . .
 
 
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
-  ln -s /public /app/public && flask digest compile && rm -rf /app/public; fi
+  cd /app && flask digest compile; fi
 
 RUN mkdir -p /app/data && chown python:python /app/data
 
