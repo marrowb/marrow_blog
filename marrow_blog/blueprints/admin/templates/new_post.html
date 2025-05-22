@@ -8,7 +8,12 @@
 {% endblock %}
 {% block body %}
     <div>
-        <h1>{{ title }}</h1>
+        <h1>
+            <input type="text"
+                   id="post-title"
+                   placeholder="Post title..."
+                   class="post-title-input">
+        </h1>
         <p>Welcome, {{ current_user.username }}!</p>
         <p>
             <div id="tinymde-commandbar"></div>

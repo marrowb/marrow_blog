@@ -3,21 +3,21 @@ export const initializeTinyMDE = () => {
   const commandBarHostElement = document.getElementById("tinymde-commandbar");
 
   if (editorHostElement && TinyMDE) {
-    setupEditor();
+    setupEditor(editorHostElement);
     if (commandBarHostElement) {
-      setupCommandBar();
+      setupCommandBar(commandBarHostElement, editorHostElement);
     }
   }
 };
 
-const setupCommandBar = () => {
+const setupCommandBar = (commandBarHostElement, editorHostElement) => {
   new TinyMDE.CommandBar({
     element: commandBarHostElement,
     editor: editor,
   });
 };
 
-const setupEditor = () => {
+const setupEditor = (editorHostElement) => {
   const editor = new TinyMDE.Editor({ element: editorHostElement });
   editor.addEventListener("change", function (event) {
     savePost();
@@ -25,13 +25,13 @@ const setupEditor = () => {
 };
 
 const savePost = (content, postID = null) => {
-  fetch(route, {
+  fetch("/api/v1/post/", {
     credentials: "include",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: { content: content, postID: postID },
+    body: { markdown_content: content, postID: postID },
   })
     .then((response) => response.json())
     .then((id) => {
