@@ -4,7 +4,34 @@
         <h1>{{ title }}</h1>
         <p>Welcome, {{ current_user.username }}!</p>
         <p>
+            <a href="{{ url_for("admin.new_post") }}">New Post</a>
             <a href="{{ url_for("admin.logout") }}">Logout</a>
         </p>
+    </div>
+    <div>
+        <h2>Draft Posts</h2>
+        <ol>
+            {% for draft in drafts %}
+                <li>
+                    <a href={{ url_for("admin.post", id=draft.id) }}>
+                        <span>{{ draft.title }}</span>
+                        <span>{{ draft.updated_on }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+    <div>
+        <h2>Published Posts</h2>
+        <ol>
+            {% for pub in publications %}
+                <li>
+                    <a href={{ url_for("admin.post", id=pub.id) }}>
+                        <span>{{ pub.title }}</span>
+                        <span>{{ pub.updated_on }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ol>
     </div>
 {% endblock %}

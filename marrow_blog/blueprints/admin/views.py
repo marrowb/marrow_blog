@@ -5,6 +5,7 @@ import pyotp # Uncomment if you implement pyotp for MFA
 
 from .forms import LoginForm
 from .models import AdminUser
+from marrow_blog.blueprints.posts.models import Post
 from marrow_blog.extensions import db
 
 admin = Blueprint("admin", __name__, template_folder="templates")
@@ -44,4 +45,16 @@ def logout():
 @admin.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", title="Admin Dashboard")
+    drafts = Post.query.filter_by(published=False).all()
+    pubs = Post.query.filter_by(published=True).all()
+    return render_template("dashboard.html", title="Admin Dashboard", drafts=drafts, pubs=pubs)
+
+@admin.route("/new_post")
+@login_required
+def new_post():
+    return render_template("new_post.html", title="New Post")
+
+@admin.route("/post/<id>")
+@login_required
+def new_post():
+    return render_template("new_post.html", title="New Post")
