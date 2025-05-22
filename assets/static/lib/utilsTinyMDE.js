@@ -62,7 +62,7 @@ const setupEditor = (editorHostElement) => {
       }
 
       saveTimeout = setTimeout(() => {
-        savePost(editor.getContent(), false, currentPostId);
+        savePost(editor.getContent(), title, currentPostId);
       }, 10000);
     });
   }
