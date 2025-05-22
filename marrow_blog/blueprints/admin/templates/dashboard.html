@@ -24,7 +24,7 @@
     <div>
         <h2>Published Posts</h2>
         <ol>
-            {% for pub in publications %}
+            {% for pub in pubs %}
                 <li>
                     <a href={{ url_for("admin.post", id=pub.id) }}>
                         <span>{{ pub.title }}</span>
