@@ -4,7 +4,7 @@
         <h1>{{ title }}</h1>
         <p>Welcome, {{ current_user.username }}!</p>
         <p>
-            <a href="{{ url_for("admin.new_post") }}">New Post</a>
+            <a href="{{ url_for("admin.post") }}">New Post</a>
             <a href="{{ url_for("admin.logout") }}">Logout</a>
         </p>
     </div>

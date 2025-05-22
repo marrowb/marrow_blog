@@ -49,12 +49,8 @@ def dashboard():
     pubs = Post.query.filter_by(published=True).all()
     return render_template("dashboard.html", title="Admin Dashboard", drafts=drafts, pubs=pubs)
 
-@admin.route("/new_post")
+@admin.route("/post/")
 @login_required
-def new_post():
-    return render_template("new_post.html", title="New Post")
+def post():
+    return render_template("post_editor.html", title="Post Editor")
 
-@admin.route("/post/<id>")
-@login_required
-def new_post():
-    return render_template("new_post.html", title="New Post")
