@@ -37,7 +37,7 @@ class UploadView(V1FlaskView):
             # Return the path for markdown insertion
             return jsonify({
                 'filename': unique_filename,
-                'path': f'/static/uploads/{unique_filename}'
+                'path': f'/uploads/{unique_filename}'
             }), 200
         
         return jsonify({'error': 'Invalid file type'}), 400
