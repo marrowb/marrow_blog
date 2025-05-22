@@ -6,11 +6,10 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from marrow_blog.blueprints.admin.models import AdminUser
 from cli.commands.cmd_admin import init_app as init_admin_cli
 
-from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager
+from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager, marshmallow
 from marrow_blog.blueprints.page import page
 from marrow_blog.blueprints.up import up
 from marrow_blog.blueprints.admin import admin
-from marrow_blog.blueprints.api.views import api as api_blueprint # Import the api blueprint
 from marrow_blog.blueprints.api.v1.post_views import PostView # Add this import
 
 
@@ -60,7 +59,6 @@ def create_app(settings_override=None):
     app.register_blueprint(up)
     app.register_blueprint(page)
     app.register_blueprint(admin)
-    app.register_blueprint(api_blueprint) # Register the main /api blueprint
 
     # Register your new PostView directly to the app for /api/v1/post routes
     PostView.register(app) # Add this line
@@ -83,6 +81,7 @@ def extensions(app):
     db.init_app(app)
     flask_static_digest.init_app(app)
     login_manager.init_app(app)
+    marshmallow.init_app(app)
     return None
 
 

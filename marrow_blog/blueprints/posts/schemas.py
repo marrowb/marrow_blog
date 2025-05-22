@@ -1,6 +1,5 @@
 from marshmallow import fields, validate
 from marrow_blog.extensions import marshmallow
-from marrow_blog.blueprints.posts.models import Post
 
 class PostSchema(marshmallow.Schema):
     id = fields.Int(dump_only=True)

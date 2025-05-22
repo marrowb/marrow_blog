@@ -6,7 +6,7 @@ class Post(ResourceMixin, db.Model):
     __tablename__ = "posts"
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255), nullable=False, unique=True)
     markdown_content = db.Column(db.Text, nullable=True)
     published = db.Column(db.Boolean, default=False, nullable=False)
 
