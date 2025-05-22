@@ -100,8 +100,17 @@ const setupCommandBar = (commandBarHostElement, editor) => {
         action: function () {
           console.log("Publishing...");
           const title = document.getElementById("post-title").value;
-          savePost(editor.getContent(), title, currentPostId);
-          publishPost(currentPostId);
+          const content = editor.getContent();
+          
+          // Save with the published flag directly in one request
+          const method = currentPostId ? "PATCH" : "POST";
+          const url = currentPostId ? `/api/v1/post/${currentPostId}` : "/api/v1/post/";
+          
+          apiRequest(url, method, {
+            title: title,
+            markdown_content: content,
+            published: true
+          });
         },
         hotkey: "Mod-Shift-P",
       },
@@ -167,7 +176,7 @@ const savePost = (content, title, postID = null) => {
         window.history.pushState({}, "", newUrl);
       }
 
-      updateStatusMessage(published ? "Published" : "Saved");
+      updateStatusMessage("Saved");
       updatePublishedAndModified(data?.published, data?.updated_on);
     })
     .catch(() => {
