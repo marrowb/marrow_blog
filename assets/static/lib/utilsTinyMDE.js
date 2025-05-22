@@ -1,5 +1,6 @@
 let saveTimeout = null;
 let currentPostId = null;
+let lastKnownUpdateTime = null;
 
 // API interaction abstraction
 const apiRequest = (url, method, data = null) => {
@@ -130,6 +131,7 @@ const loadPost = (postId, editor) => {
       if (data.markdown_content && editor) {
         editor.setContent(data.markdown_content);
       }
+      lastKnownUpdateTime = data.updated_on;
       updatePublishedAndModified(data?.published, data?.updated_on);
     })
     .catch((error) => {
@@ -164,10 +166,18 @@ const savePost = (content, title, postID = null) => {
   const postData = {
     title: title,
     markdown_content: content,
+    last_known_update: lastKnownUpdateTime
   };
 
   apiRequest(url, method, postData)
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status === 409) {
+        // Conflict detected
+        updateStatusMessage("Post was modified elsewhere. Reload to see changes.");
+        return Promise.reject("Conflict");
+      }
+      return response.json();
+    })
     .then((data) => {
       if (!postID && data.id) {
         currentPostId = data.id;
@@ -176,11 +186,14 @@ const savePost = (content, title, postID = null) => {
         window.history.pushState({}, "", newUrl);
       }
 
+      lastKnownUpdateTime = data.updated_on;
       updateStatusMessage("Saved");
       updatePublishedAndModified(data?.published, data?.updated_on);
     })
-    .catch(() => {
-      updateStatusMessage("Save failed");
+    .catch((error) => {
+      if (error !== "Conflict") {
+        updateStatusMessage("Save failed");
+      }
     });
 };
 

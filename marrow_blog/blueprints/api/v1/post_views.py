@@ -58,6 +58,11 @@ class PostView(V1FlaskView):
         if not json_data:
             return jsonify({'error': 'Invalid input'}), 400
 
+        # Check for version conflict
+        last_known_update = json_data.get('last_known_update')
+        if last_known_update and post.updated_on.isoformat() != last_known_update:
+            return jsonify({'error': 'Post has been modified since last load'}), 409
+
         try: 
             data = update_post_schema.load(json_data, partial=True)
         except marshmallow.ValidationError as err:
