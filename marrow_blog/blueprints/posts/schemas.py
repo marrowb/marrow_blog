@@ -33,6 +33,7 @@ class CreateOrUpdatePostSchema(marshmallow.Schema):
     title = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     markdown_content = fields.Str(allow_none=True, load_default="")
     published = fields.Bool(load_default=False)
+    updated_on = fields.Str(required=False, allow_none=False)
 
 post_schema = PostSchema()
 posts_schema = PostSchema(many=True)
