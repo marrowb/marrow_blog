@@ -49,7 +49,8 @@ RUN apt-get update \
   && groupadd -g "${GID}" python \
   && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python \
   && chown python:python -R /app \
-  && mkdir -p /public && chown python:python -R /public
+  && mkdir -p /public && chown python:python -R /public \
+  && mkdir -p /app/public/uploads && chown python:python -R /app/public/uploads
 
 USER python
 
