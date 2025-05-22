@@ -8,13 +8,13 @@ const apiRequest = (url, method, data = null) => {
     method: method,
     headers: {
       "Content-Type": "application/json",
-    }
+    },
   };
-  
+
   if (data) {
     options.body = JSON.stringify(data);
   }
-  
+
   return fetch(url, options);
 };
 
@@ -51,7 +51,7 @@ const setupEditor = (editorHostElement) => {
 
     saveTimeout = setTimeout(() => {
       const title = titleInput ? titleInput.value : "";
-      savePost(editor.getContent(), title, false, currentPostId);
+      savePost(editor.getContent(), title, currentPostId);
     }, 10000);
   });
 
@@ -62,7 +62,7 @@ const setupEditor = (editorHostElement) => {
       }
 
       saveTimeout = setTimeout(() => {
-        savePost(editor.getContent(), titleInput.value, false, currentPostId);
+        savePost(editor.getContent(), false, currentPostId);
       }, 10000);
     });
   }
@@ -100,7 +100,8 @@ const setupCommandBar = (commandBarHostElement, editor) => {
         action: function () {
           console.log("Publishing...");
           const title = document.getElementById("post-title").value;
-          savePost(editor.getContent(), title, true, currentPostId);
+          savePost(editor.getContent(), title, currentPostId);
+          publishPost(currentPostId);
         },
         hotkey: "Mod-Shift-P",
       },
@@ -127,7 +128,20 @@ const loadPost = (postId, editor) => {
     });
 };
 
-const savePost = (content, title, published = false, postID = null) => {
+const publishPost = (postID) => {
+  if (!postID) {
+    updateStatusMessage("No postID provided");
+    return;
+  }
+  const method = "PATCH";
+  const url = `/api/v1/post/${postID}`;
+  const postData = {
+    published: true,
+  };
+
+  apiRequest(url, method, postData);
+};
+const savePost = (content, title, postID = null) => {
   if (!title) {
     updateStatusMessage("Title required");
     return;
@@ -141,7 +155,6 @@ const savePost = (content, title, published = false, postID = null) => {
   const postData = {
     title: title,
     markdown_content: content,
-    published: published,
   };
 
   apiRequest(url, method, postData)
