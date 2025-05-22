@@ -1,6 +1,23 @@
 let saveTimeout = null;
 let currentPostId = null;
 
+// API interaction abstraction
+const apiRequest = (url, method, data = null) => {
+  const options = {
+    credentials: "include",
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+    }
+  };
+  
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
+  
+  return fetch(url, options);
+};
+
 export const initializeTinyMDE = () => {
   const editorHostElement = document.getElementById("editor");
   const commandBarHostElement = document.getElementById("tinymde-commandbar");
@@ -92,10 +109,7 @@ const setupCommandBar = (commandBarHostElement, editor) => {
 };
 
 const loadPost = (postId, editor) => {
-  fetch(`/api/v1/post/${postId}`, {
-    credentials: "include",
-    method: "GET",
-  })
+  apiRequest(`/api/v1/post/${postId}`, "GET")
     .then((response) => response.json())
     .then((data) => {
       const titleInput = document.getElementById("post-title");
@@ -130,14 +144,7 @@ const savePost = (content, title, published = false, postID = null) => {
     published: published,
   };
 
-  fetch(url, {
-    credentials: "include",
-    method: method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(postData),
-  })
+  apiRequest(url, method, postData)
     .then((response) => response.json())
     .then((data) => {
       if (!postID && data.id) {
