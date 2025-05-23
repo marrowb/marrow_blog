@@ -48,9 +48,7 @@ RUN apt-get update \
   && apt-get clean \
   && groupadd -g "${GID}" python \
   && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python \
-  && chown python:python -R /app \
-  && mkdir -p /public && chown python:python -R /public \
-  && mkdir -p /app/public/uploads && chown python:python -R /app/public/uploads
+  && chown python:python -R /app
 
 USER python
 
@@ -64,20 +62,26 @@ ENV FLASK_DEBUG="${FLASK_DEBUG}" \
   PATH="${PATH}:/home/python/.local/bin" \
   USER="python"
 
-COPY --chown=python:python ./assets/static /app/public
+COPY --chown=python:python --from=app-build /home/python/.local /home/python/.local
+COPY --from=app-build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
+COPY --chown=python:python . .
+
+# Copy static assets to /public (for entrypoint to use at runtime)
+COPY --chown=python:python ./assets/static /public
 
 COPY --chown=python:python --from=app-build /home/python/.local /home/python/.local
 COPY --from=app-build /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 COPY --chown=python:python . .
 
-
-
-RUN echo $(id)
-
+# Create temporary symlink for flask digest compile (since assets are in /public)
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
-  cd /app && SECRET_KEY=dummy flask digest compile; fi
+  ln -s /public /app/public && cd /app && SECRET_KEY=dummy flask digest compile && rm -rf /app/public; fi
 
-RUN mkdir -p /app/data && chown python:python /app/data
+# Create uploads directory for runtime
+RUN mkdir -p ./public/uploads
+
+# Create data directory for SQLite
+RUN mkdir -p ./data
 
 ENTRYPOINT ["/app/bin/docker-entrypoint-web"]
 
