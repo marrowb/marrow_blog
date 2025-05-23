@@ -72,6 +72,8 @@ COPY --chown=python:python . .
 
 
 
+RUN echo $(id)
+
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
   cd /app && SECRET_KEY=dummy flask digest compile; fi
 
