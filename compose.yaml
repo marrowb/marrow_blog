@@ -14,8 +14,7 @@ x-app: &default-app
   volumes:
     - "${DOCKER_WEB_VOLUME:-./public:/app/public}"
     - "${STATIC_MOUNT:-./nonexistent:/tmp/unused}"
-    - "sqlite_data:/app/data"
-    - "uploads_data:/app/public/uploads"
+    - "site_data:/app/data"
 
 services:
   web:
@@ -47,5 +46,4 @@ services:
     profiles: ["worker"]
 
 volumes:
-  sqlite_data: {}
-  uploads_data: {}
+  site_data: {}
