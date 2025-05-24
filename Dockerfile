@@ -77,11 +77,6 @@ COPY --chown=python:python . .
 RUN if [ "${FLASK_DEBUG}" != "true" ]; then \
   ln -s /public /app/public && cd /app && SECRET_KEY=dummy flask digest compile && rm -rf /app/public; fi
 
-# Create uploads directory for runtime
-RUN mkdir -p ./public/uploads
-
-# Create data directory for SQLite
-RUN mkdir -p ./data
 
 ENTRYPOINT ["/app/bin/docker-entrypoint-web"]
 

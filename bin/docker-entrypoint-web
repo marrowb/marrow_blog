@@ -4,6 +4,25 @@ set -e
 
 # Always keep this here as it ensures your latest built assets make their way
 # into your volume persisted public directory.
-cp -r /public /app
+cp -r /public /app 
+
+
+# Fix data directory permissions if needed and possible
+if [ ! -w "/app/data" ] && command -v sudo >/dev/null 2>&1; then
+    echo "Fixing /app/data permissions..."
+    sudo chown -R python:python /app/data
+    sudo chmod -R 755 /app/data
+elif [ ! -w "/app/data" ]; then
+    echo "Warning: /app/data is not writable. To fix:"
+    echo "docker exec -u root <container> chown -R 1000:1000 /app/data"
+fi
+
+# Ensure uploads directory exists
+mkdir -p /app/data/uploads 2>/dev/null || true
+chown -R python:python /app/data/uploads
+chmod -R 755 /app/data/uploads
+if [ ! -d /app/data/uploads ]; then
+    ln -s /app/data/uploads /app/public/
+fi
 
 exec "$@"

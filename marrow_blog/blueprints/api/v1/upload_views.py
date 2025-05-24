@@ -29,7 +29,7 @@ class UploadView(V1FlaskView):
             unique_filename = f"{name}_{uuid.uuid4().hex[:8]}{ext}"
             
             # Save to the static folder
-            upload_path = os.path.join(current_app.static_folder, 'uploads')
+            upload_path = os.path.join("/app/data/", 'uploads')
             os.makedirs(upload_path, exist_ok=True)
             file_path = os.path.join(upload_path, unique_filename)
             file.save(file_path)

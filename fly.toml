@@ -1,21 +1,43 @@
-app = 'marrow-blog'
-primary_region = 'ewr'
+# fly.toml app configuration file generated for marrow-blog on 2025-05-24T15:34:13-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app  =  'marrow-blog'
+primary_region  =  'ewr'
 
 [build]
 
 [http_service]
-  internal_port = 8000
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+  internal_port  =  8000
+  force_https  =  true
+  auto_stop_machines  =  'stop'
+  auto_start_machines  =  true
+  min_machines_running  =  0
+  processes  =  ['app']
 
-[mounts]
-  source="mblog_db"
-  destination="/app/data"
+  
+[env]
+  DOCKER_WEB_PORT_FORWARD = '0.0.0.0:8080'
+  DOCKER_WEB_VOLUME = './public:/app/public'
+  DOCKER_BUILDKIT = 1
+  COMPOSE_PROJECT_NAME = 'marrowblog'
+  COMPOSE_PROFILES = 'web,worker'
+  PYTHONDONTWRITEBYTECODE = true
+  FLASK_DEBUG = false
+  WEB_RELOAD = false
+  DOCKER_RESTART_POLICY = 'unless-stopped'
+  DOCKER_WEB_HEALTHCHECK_TEST = 'curl localhost:8000/up'
+
+[[mounts]]
+  source = 'mblog_data'
+  destination = '/app/data'
+  initial_size = '20gb'
+  auto_extend_size_threshold = 80
+  auto_extend_size_increment = '1GB'
+  auto_extend_size_limit = '10GB'
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+  memory  =  '1gb'
+  cpu_kind  =  'shared'
+  cpus  =  1
