@@ -1,6 +1,7 @@
 let saveTimeout = null;
 let currentPostId = null;
 let lastKnownUpdateTime = null;
+const saveTimeoutLength = 3000;
 
 // API interaction abstraction
 const apiRequest = (url, method, data = null) => {
@@ -56,7 +57,7 @@ const setupEditor = (editorHostElement) => {
     saveTimeout = setTimeout(() => {
       const title = titleInput ? titleInput.value : "";
       savePost(editor.getContent(), title, currentPostId);
-    }, 10000);
+    }, saveTimeoutLength);
   });
 
   if (titleInput) {
@@ -67,7 +68,7 @@ const setupEditor = (editorHostElement) => {
 
       saveTimeout = setTimeout(() => {
         savePost(editor.getContent(), title, currentPostId);
-      }, 10000);
+      }, saveTimeoutLength);
     });
   }
 
