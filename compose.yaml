@@ -17,8 +17,22 @@ x-app: &default-app
     - "site_data:/app/data"
 
 services:
+  init:
+    <<: *default-app
+    user: root
+    entrypoint: []
+    command: |
+      sh -c "
+        mkdir -p /app/data /app/data/uploads
+        chown -R 1000:1000 /app/data
+        chmod -R 755 /app/data
+      "
+    profiles: ["web"]
+
   web:
     <<: *default-app
+    depends_on:
+      - init
     deploy:
       resources:
         limits:
