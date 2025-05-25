@@ -127,7 +127,7 @@ const setupCommandBar = (commandBarHostElement, editor) => {
 };
 
 const loadPost = (postId, editor) => {
-  apiRequest(`/api/v1/post/${postId}`, "GET")
+  apiRequest(`/api/v1/post/${postId}/`, "GET")
     .then((response) => response.json())
     .then((data) => {
       const titleInput = document.getElementById("post-title");
