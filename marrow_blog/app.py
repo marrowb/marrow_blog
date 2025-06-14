@@ -4,7 +4,7 @@ from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from marrow_blog.blueprints.admin.models import AdminUser
-from cli.commands.cmd_admin import init_app as init_admin_cli
+from cli.commands.cmd_admin import admin_cli
 
 from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager, marshmallow, flat_pages
 from marrow_blog.blueprints.page import page
@@ -51,11 +51,14 @@ def create_app(settings_override=None):
     if settings_override:
         app.config.update(settings_override)
 
-    middleware(app)
+    # Enable the Flask interactive debugger in the brower for development.
+    if app.debug:
+        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
-    # Removed redundant DebuggedApplication wrapper, it's in middleware(app)
-    # if app.debug:
-    #     app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+    # Set the real IP address into request.remote_addr when behind a proxy.
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+
+
 
     app.register_blueprint(up)
     app.register_blueprint(page)
@@ -66,8 +69,8 @@ def create_app(settings_override=None):
     UploadView.register(app)
 
     extensions(app)
+    app.cli.add_command(admin_cli)
     authentication(app, AdminUser)
-    init_admin_cli(app)
 
     return app
 
@@ -106,12 +109,13 @@ def middleware(app):
     :param app: Flask application instance
     :return: None
     """
-    # Enable the Flask interactive debugger in the brower for development.
-    if app.debug:
-        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
     # Set the real IP address into request.remote_addr when behind a proxy.
     app.wsgi_app = ProxyFix(app.wsgi_app)
+
+    # Enable the Flask interactive debugger in the brower for development.
+    if app.debug:
+        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
 
     return None
 

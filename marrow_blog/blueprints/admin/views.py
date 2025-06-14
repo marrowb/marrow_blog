@@ -2,8 +2,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask import current_app
 from flask_login import login_user, logout_user, login_required, current_user
 import pyotp # Uncomment if you implement pyotp for MFA
+from werkzeug.utils import secure_filename
 
-from .forms import LoginForm
+from .forms import LoginForm, UploadForm
 from .models import AdminUser
 from marrow_blog.blueprints.posts.models import Post
 from marrow_blog.extensions import db
@@ -45,12 +46,31 @@ def logout():
 @admin.route("/dashboard")
 @login_required
 def dashboard():
+    raise
     drafts = Post.query.filter_by(published=False).all()
     pubs = Post.query.filter_by(published=True).all()
     return render_template("dashboard.html", title="Admin Dashboard", drafts=drafts, pubs=pubs)
 
-@admin.route("/post/")
+@admin.route("/post")
 @login_required
 def post():
     return render_template("post_editor.html", title="Post Editor")
+
+@admin.route("/document", methods=["GET", "POST"])
+@login_required
+def document():
+    form = UploadForm()
+    if form.validate_on_submit():
+        # filename = secure_filename(form.doc_file.data.filename)
+        # path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        raise
+        new_post = Post(
+            title=data['title'],
+            markdown_content=data.get('markdown_content'),
+            published=False,
+            author_id=current_user.id 
+        )
+        new_post.save()
+        flash('File imported, beginning A-Number check. Check back soon.')
+    return render_template("upload_doc.html", title="Upload Document", form=form)
 

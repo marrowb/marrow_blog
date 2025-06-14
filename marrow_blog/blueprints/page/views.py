@@ -5,7 +5,7 @@ from flask import Blueprint, render_template
 from marrow_blog.blueprints.posts.models import Post
 from flask_flatpages.utils import pygmented_markdown
 
-from config.settings import DEBUG
+# from config.settings import DEBUG
 
 page = Blueprint("page", __name__, template_folder="templates")
 
@@ -16,7 +16,6 @@ def home():
         "page/home.html",
         flask_ver=version("flask"),
         python_ver=os.environ["PYTHON_VERSION"],
-        debug=DEBUG,
     )
 
 @page.get("/blog/<int:post_id>")
