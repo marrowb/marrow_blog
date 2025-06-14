@@ -91,6 +91,35 @@ This project uses a custom `./run` script for common development tasks:
 - `run` script - Development task automation
 - `.env` - Environment configuration (copy from `.env.example`)
 
+### Fly.io Deployment
+
+This application is configured for deployment to Fly.io:
+
+#### Configuration (`fly.toml`)
+- **App Name**: `marrow-blog`
+- **Region**: `ewr` (Newark)
+- **Internal Port**: 8000
+- **Production URL**: `marrow-blog.fly.dev`
+- **Persistent Storage**: 20GB volume mounted at `/app/data` for SQLite database
+- **Auto-scaling**: Configured to stop/start machines automatically with 0 minimum running
+
+#### Production Environment Variables
+- `FLASK_DEBUG=false` - Disables debug mode in production
+- `WEB_RELOAD=false` - Disables code reloading
+- `SERVER_NAME=marrow-blog.fly.dev` - Production domain
+- Health check endpoint: `/up`
+
+#### Continuous Deployment
+- **GitHub Actions**: `.github/workflows/fly-deploy.yml`
+- **Trigger**: Automatic deployment on push to `main` branch
+- **Requirements**: `FLY_API_TOKEN` secret configured in GitHub repository
+- **Command**: `flyctl deploy --remote-only` (builds on Fly.io infrastructure)
+
+#### Manual Deployment
+- Install Fly CLI: `curl -L https://fly.io/install.sh | sh`
+- Login: `flyctl auth login`
+- Deploy: `flyctl deploy`
+
 ## Database Operations
 
 ### Common Patterns
