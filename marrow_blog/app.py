@@ -6,7 +6,14 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from marrow_blog.blueprints.admin.models import AdminUser
 from cli.commands.cmd_admin import admin_cli
 
-from marrow_blog.extensions import db, debug_toolbar, flask_static_digest, login_manager, marshmallow, flat_pages
+from marrow_blog.extensions import (
+    db,
+    debug_toolbar,
+    flask_static_digest,
+    login_manager,
+    marshmallow,
+    flat_pages,
+)
 from marrow_blog.blueprints.page import page
 from marrow_blog.blueprints.up import up
 from marrow_blog.blueprints.admin import admin
@@ -51,14 +58,18 @@ def create_app(settings_override=None):
     if settings_override:
         app.config.update(settings_override)
 
-    # Enable the Flask interactive debugger in the brower for development.
-    if app.debug:
-        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
-
     # Set the real IP address into request.remote_addr when behind a proxy.
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
+    # Enable the Flask interactive debugger in the brower for development.
+    if app.debug:
+        app.wsgi_app = DebuggedApplication(app.wsgi_app, evalex=True)
+        # from werkzeug.debug import get_current_traceback
+        import sys
 
+        pin = app.wsgi_app.pin
+        if pin:
+            print(f" * Debugger PIN: {pin}", file=sys.stderr, flush=True)
 
     app.register_blueprint(up)
     app.register_blueprint(page)
@@ -82,7 +93,7 @@ def extensions(app):
     :param app: Flask application instance
     :return: None
     """
-    debug_toolbar.init_app(app)
+    # debug_toolbar.init_app(app)
     db.init_app(app)
     flask_static_digest.init_app(app)
     login_manager.init_app(app)
@@ -99,6 +110,7 @@ def authentication(app, user_model):
     @login_manager.user_loader
     def load_user(uid):
         return user_model.query.get(int(uid))
+
     return None
 
 
