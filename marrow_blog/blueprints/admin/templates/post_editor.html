@@ -8,6 +8,10 @@
 {% endblock %}
 {% block body %}
     <div>
+        <p>
+            <a href="{{ url_for("admin.dashboard") }}">← Back to Dashboard</a>
+            <a href="{{ url_for("admin.upload_doc") }}">Upload Document</a>
+        </p>
         <h1>
             <input type="text"
                    id="post-title"
