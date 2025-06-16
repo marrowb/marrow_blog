@@ -27,11 +27,11 @@ export const initializeTinyMDE = () => {
   // Check URL for post ID (support both ?id=123 and /post/123)
   const urlParams = new URLSearchParams(window.location.search);
   currentPostId = urlParams.get("id");
-  
+
   // If no query param, check if ID is in the path (e.g., /post/123)
   if (!currentPostId) {
-    const pathParts = window.location.pathname.split('/');
-    const postIndex = pathParts.indexOf('post');
+    const pathParts = window.location.pathname.split("/");
+    const postIndex = pathParts.indexOf("post");
     if (postIndex !== -1 && pathParts[postIndex + 1]) {
       currentPostId = pathParts[postIndex + 1];
     }
@@ -108,26 +108,22 @@ const setupCommandBar = (commandBarHostElement, editor) => {
       "insertImage",
       "|",
       {
-        name: "publish",
-        title: "Publish Post",
-        innerHTML: `<svg height="18" width="18"><path d="M5 3v10h8V3H5zm1 1h6v8H6V4zm1 2h4v1H7V6zm0 2h4v1H7V8zm0 2h3v1H7v-1z" fill="currentColor"/></svg>`,
+        name: "preview",
+        title: "Preview Post",
+        innerHTML: `<svg height="18" width="18"><path d="M9 2C5 2 1 5 1 9s4 7 8 7 8-3 8-7-4-7-8-7zm0 12c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/></svg>`,
         action: function () {
-          console.log("Publishing...");
-          const title = document.getElementById("post-title").value;
-          const content = editor.getContent();
-
-          // Save with the published flag directly in one request
-          const method = currentPostId ? "PATCH" : "POST";
-          const url = currentPostId
-            ? `/api/v1/post/${currentPostId}`
-            : "/api/v1/post/";
-
-          apiRequest(url, method, {
-            title: title,
-            markdown_content: content,
-            published: true,
-            updated_on: lastKnownUpdateTime,
-          });
+          if (!currentPostId) {
+            // Save first if new post
+            const title = document.getElementById("post-title").value;
+            const content = editor.getContent();
+            savePost(content, title, currentPostId);
+            setTimeout(() => {
+              window.location.href = `/preview/${currentPostId}`;
+            }, 500);
+          } else {
+            // Navigate directly if post exists
+            window.location.href = `/preview/${currentPostId}`;
+          }
         },
         hotkey: "Mod-Shift-P",
       },
