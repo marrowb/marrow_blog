@@ -1,0 +1,26 @@
+{% extends "layouts/base.html" %}
+{% from "macros/post.html" import render_post %}
+{% block body %}
+    <!-- Metadata and action section -->
+    <div class="preview-metadata">
+        <h1>Preview: {{ post.title }}</h1>
+        <div class="preview-actions">
+            <form method="POST" action="/api/v1/post/{{ post.id }}" style="display:inline;">
+                <input type="hidden" name="published" value="true">
+                <button type="submit" class="publish-btn">🚀 Publish Post</button>
+            </form>
+            <a href="{{ url_for('admin.post', post_id=post.id) }}">← Back to Editor</a>
+        </div>
+        <div class="meta-info">
+            <span>Status: {{ "Published" if post.published else "Draft" }}</span>
+            <span>Created: {{ post.created_on.strftime("%B %d, %Y") }}</span>
+            <span>Modified: {{ post.updated_on.strftime("%B %d, %Y") }}</span>
+            {% if post.tags %}<span>Tags: {{ post.tags }}</span>{% endif %}
+        </div>
+    </div>
+    
+    <!-- Rendered content using macro -->
+    <div class="preview-content">
+        {{ render_post(post, content, css_class="preview-post") }}
+    </div>
+{% endblock %}

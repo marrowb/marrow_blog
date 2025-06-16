@@ -65,28 +65,46 @@ def post(post_id=None):
     return render_template("post_editor.html", title="Post Editor")
 
 
+@admin.route("/preview/<int:post_id>")
+@login_required
+def preview(post_id):
+    """Preview post before publishing with metadata and publish option."""
+    post = Post.query.filter_by(id=post_id).first_or_404()
+
+    # Reuse existing rendering logic from page blueprint
+    from flask_flatpages.utils import pygmented_markdown
+
+    html_content = pygmented_markdown(post.markdown_content)
+
+    return render_template(
+        "preview.html", post=post, content=html_content, title="Preview Post"
+    )
+
+
 @admin.route("/upload-doc", methods=["GET", "POST"])
 @login_required
 def upload_doc():
     form = UploadForm()
-    
+
     if form.validate_on_submit() and form.doc_file.data:
         file_storage = form.doc_file.data
         if not file_storage.filename:
             flash("No file selected", "error")
-            return render_template("upload_doc.html", title="Upload Document", form=form)
-        
+            return render_template(
+                "upload_doc.html", title="Upload Document", form=form
+            )
+
         # Read file content immediately
         content_bytes = file_storage.stream.read()
-        
+
         # Process upload
         success, message, post = PostManager.create_from_upload(
             content_bytes, file_storage.filename, current_user.id
         )
-        
+
         flash(message, "success" if success else "error")
-        
+
         if success and post:
-            return redirect(url_for('admin.post', post_id=post.id))
-    
+            return redirect(url_for("admin.post", post_id=post.id))
+
     return render_template("upload_doc.html", title="Upload Document", form=form)
