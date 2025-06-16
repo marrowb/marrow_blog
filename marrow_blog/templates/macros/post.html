@@ -1,0 +1,14 @@
+{% macro render_post(post, content, show_meta=true, css_class="") %}
+<article class="{{ css_class }}">
+    <h1>{{ post.title }}</h1>
+    {% if show_meta %}
+    <div class="meta">
+        <time datetime="{{ post.created_on.isoformat() }}">
+            {{ post.created_on.strftime("%B %d, %Y") }}
+        </time>
+        <span class="author">by {{ post.author.username }}</span>
+    </div>
+    {% endif %}
+    <div class="content">{{ content|safe }}</div>
+</article>
+{% endmacro %}
