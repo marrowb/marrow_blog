@@ -24,9 +24,18 @@ export const initializeTinyMDE = () => {
   const editorHostElement = document.getElementById("editor");
   const commandBarHostElement = document.getElementById("tinymde-commandbar");
 
-  // Check URL for post ID
+  // Check URL for post ID (support both ?id=123 and /post/123)
   const urlParams = new URLSearchParams(window.location.search);
   currentPostId = urlParams.get("id");
+  
+  // If no query param, check if ID is in the path (e.g., /post/123)
+  if (!currentPostId) {
+    const pathParts = window.location.pathname.split('/');
+    const postIndex = pathParts.indexOf('post');
+    if (postIndex !== -1 && pathParts[postIndex + 1]) {
+      currentPostId = pathParts[postIndex + 1];
+    }
+  }
 
   if (editorHostElement && window.TinyMDE) {
     const editor = setupEditor(editorHostElement);
