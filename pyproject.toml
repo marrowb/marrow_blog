@@ -35,7 +35,8 @@ dependencies = [
   "wtforms-components==0.10.5",
   "wtforms-alchemy==0.18.0",
   "wtforms==3.0.1",
-  "python-frontmatter==1.1.0"
+  "python-frontmatter==1.1.0",
+  "python-slugify==8.0.4"
 ]
 
 [tool.ruff]
