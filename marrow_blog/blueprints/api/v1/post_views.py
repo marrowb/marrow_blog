@@ -39,10 +39,19 @@ class PostView(V1FlaskView):
         except ValidationError as err:
             return jsonify({'error': err.messages}), 422
 
+        # Generate slug if not provided
+        slug = data.get('slug')
+        if not slug:
+            from lib.document_processor import DocumentProcessor
+            slug = DocumentProcessor.generate_unique_slug(data['title'])
+
         new_post = Post(
             title=data['title'],
+            slug=slug,
+            excerpt=data.get('excerpt'),
             markdown_content=data.get('markdown_content'),
             published=data.get('published', False),
+            tags=data.get('tags'),
             author_id=current_user.id 
         )
         new_post.save()
@@ -69,12 +78,24 @@ class PostView(V1FlaskView):
         except ValidationError as err:
             return jsonify({'error': err.messages}), 422
 
+        # Check slug uniqueness if updating
+        if 'slug' in data:
+            existing = Post.query.filter(Post.slug == data['slug'], Post.id != id).first()
+            if existing:
+                return jsonify({'error': 'Slug already exists'}), 409
+
         if 'title' in data:
             post.title = data['title']
+        if 'slug' in data:
+            post.slug = data['slug']
+        if 'excerpt' in data:
+            post.excerpt = data['excerpt']
         if 'markdown_content' in data:
             post.markdown_content = data['markdown_content']
         if 'published' in data:
             post.published = data['published']
+        if 'tags' in data:
+            post.tags = data['tags']
         
         post.save()
         return jsonify(post_schema.dump(post)), 200
@@ -88,3 +109,9 @@ class PostView(V1FlaskView):
             
         post.delete()
         return jsonify({}), 204
+    
+    @route('/by-slug/<slug>')
+    def get_by_slug(self, slug):
+        """Get post by slug for SEO-friendly URLs."""
+        post = Post.query.filter_by(slug=slug, published=True).first_or_404()
+        return jsonify(post_schema.dump(post)), 200
