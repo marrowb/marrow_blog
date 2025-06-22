@@ -1,6 +1,6 @@
 from flask import url_for
 
-from lib.test import ViewTestMixin
+from lib.tests import ViewTestMixin
 
 
 class TestUp(ViewTestMixin):
