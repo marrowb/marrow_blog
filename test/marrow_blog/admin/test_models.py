@@ -1,11 +1,11 @@
+from datetime import datetime
+
 import pytest
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
 from werkzeug.security import check_password_hash
 
-from marrow_blog.blueprints.admin.models import AdminUser
-from marrow_blog.extensions import db
 from lib.tests import ViewTestMixin
+from marrow_blog.blueprints.admin.models import AdminUser
 
 
 class TestAdminUserModel(ViewTestMixin):
@@ -27,7 +27,9 @@ class TestAdminUserModel(ViewTestMixin):
         admin.set_password("password")
 
         # Before save, should not be in database
-        assert AdminUser.query.filter_by(username="saved_admin").first() is None
+        assert (
+            AdminUser.query.filter_by(username="saved_admin").first() is None
+        )
 
         result = admin.save()
 
@@ -44,7 +46,9 @@ class TestAdminUserModel(ViewTestMixin):
         admin.save()
 
         # Verify it exists
-        assert AdminUser.query.filter_by(username="to_delete").first() is not None
+        assert (
+            AdminUser.query.filter_by(username="to_delete").first() is not None
+        )
 
         admin.delete()
 
@@ -69,7 +73,9 @@ class TestAdminUserModel(ViewTestMixin):
         assert admin.mfa_secret is None
 
         # Test MFA admin
-        mfa_admin = AdminUser.query.filter_by(username="test_admin_mfa").first()
+        mfa_admin = AdminUser.query.filter_by(
+            username="test_admin_mfa"
+        ).first()
         assert mfa_admin is not None
         assert mfa_admin.username == "test_admin_mfa"
         assert mfa_admin.mfa_secret == "TESTSECRETABC234"
@@ -111,7 +117,9 @@ class TestAdminUserPassword(ViewTestMixin):
 
         assert admin.check_password("wrong_password") is False
         assert admin.check_password("") is False
-        assert admin.check_password("CORRECT_PASSWORD") is False  # Case sensitive
+        assert (
+            admin.check_password("CORRECT_PASSWORD") is False
+        )  # Case sensitive
 
     def test_password_hashing_not_reversible(self, clean_session):
         """Test password hashing is not reversible."""
@@ -124,7 +132,9 @@ class TestAdminUserPassword(ViewTestMixin):
         assert original_password not in admin.password_hash
         assert admin.password_hash != original_password
 
-    def test_multiple_users_same_password_different_hashes(self, clean_session):
+    def test_multiple_users_same_password_different_hashes(
+        self, clean_session
+    ):
         """Test multiple users can have same password with different hashes."""
         admin1 = AdminUser(username="user1")
         admin2 = AdminUser(username="user2")
@@ -166,7 +176,9 @@ class TestAdminUserPassword(ViewTestMixin):
         admin.set_password("test123")
 
         # Werkzeug hashes start with method identifier
-        assert admin.password_hash.startswith(("pbkdf2:", "scrypt:", "bcrypt:"))
+        assert admin.password_hash.startswith(
+            ("pbkdf2:", "scrypt:", "bcrypt:")
+        )
 
         # Should be verifiable with Werkzeug directly
         assert check_password_hash(admin.password_hash, "test123") is True
@@ -209,14 +221,18 @@ class TestAdminUserMFA(ViewTestMixin):
         admin.save()
 
         # Should save successfully without MFA secret
-        saved_admin = AdminUser.query.filter_by(username="optional_mfa").first()
+        saved_admin = AdminUser.query.filter_by(
+            username="optional_mfa"
+        ).first()
         assert saved_admin is not None
         assert saved_admin.mfa_secret is None
         assert saved_admin.is_mfa_enabled is False
 
     def test_mfa_secret_from_fixtures(self, session):
         """Test MFA secret from fixture data."""
-        mfa_admin = AdminUser.query.filter_by(username="test_admin_mfa").first()
+        mfa_admin = AdminUser.query.filter_by(
+            username="test_admin_mfa"
+        ).first()
 
         assert mfa_admin.mfa_secret == "TESTSECRETABC234"
         assert mfa_admin.is_mfa_enabled is True
@@ -334,7 +350,9 @@ class TestAdminUserConstraints(ViewTestMixin):
         admin.set_password("password")
         admin.save()
 
-        saved_admin = AdminUser.query.filter_by(username=valid_username).first()
+        saved_admin = AdminUser.query.filter_by(
+            username=valid_username
+        ).first()
         assert saved_admin is not None
         assert len(saved_admin.username) == 80
 
@@ -349,8 +367,12 @@ class TestAdminUserConstraints(ViewTestMixin):
         admin2.save()
 
         # Both should exist
-        assert AdminUser.query.filter_by(username="TestUser").first() is not None
-        assert AdminUser.query.filter_by(username="testuser").first() is not None
+        assert (
+            AdminUser.query.filter_by(username="TestUser").first() is not None
+        )
+        assert (
+            AdminUser.query.filter_by(username="testuser").first() is not None
+        )
 
     def test_whitespace_in_usernames(self, clean_session):
         """Test usernames can contain whitespace."""
@@ -358,7 +380,9 @@ class TestAdminUserConstraints(ViewTestMixin):
         admin.set_password("password")
         admin.save()
 
-        saved_admin = AdminUser.query.filter_by(username="user with spaces").first()
+        saved_admin = AdminUser.query.filter_by(
+            username="user with spaces"
+        ).first()
         assert saved_admin is not None
 
 
@@ -420,7 +444,9 @@ class TestAdminUserTimestamps(ViewTestMixin):
 
         # Should be recent (within last minute)
         now = datetime.now()
-        time_diff = (now - admin.created_on.replace(tzinfo=None)).total_seconds()
+        time_diff = (
+            now - admin.created_on.replace(tzinfo=None)
+        ).total_seconds()
         assert time_diff < 60  # Should be very recent
 
     def test_fixture_admin_timestamps(self, session):
@@ -431,4 +457,3 @@ class TestAdminUserTimestamps(ViewTestMixin):
         assert admin.updated_on is not None
         assert isinstance(admin.created_on, datetime)
         assert isinstance(admin.updated_on, datetime)
-

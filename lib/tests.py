@@ -28,10 +28,10 @@ class ViewTestMixin(object):
     def set_common_fixtures(self, session, client):
         self.session = session
         self.client = client
-        
+
         # Ensure each test starts with no authenticated user
         self._ensure_logged_out()
-    
+
     def _ensure_logged_out(self):
         """
         Ensure no user is logged in by attempting logout.
@@ -40,14 +40,13 @@ class ViewTestMixin(object):
         try:
             # Try to logout admin user (most common in admin tests)
             self.client.get("/logout", follow_redirects=False)
-        except:
+        except Exception:
             # If admin logout fails, try regular user logout
-            try:
-                self.client.get("/user/logout", follow_redirects=False) 
-            except:
-                # If both fail, clear session manually
-                pass
-        
+            from contextlib import suppress
+
+            with suppress(Exception):
+                self.client.get("/user/logout", follow_redirects=False)
+
         # Clear session state to ensure clean start
         with self.client.session_transaction() as sess:
             sess.clear()

@@ -3,22 +3,20 @@ from flask import Flask
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from marrow_blog.blueprints.admin.models import AdminUser
 from cli.commands.cmd_admin import admin_cli
-
-from marrow_blog.extensions import (
-    db,
-    debug_toolbar,
-    flask_static_digest,
-    login_manager,
-    marshmallow,
-    flat_pages,
-)
-from marrow_blog.blueprints.page import page
-from marrow_blog.blueprints.up import up
 from marrow_blog.blueprints.admin import admin
+from marrow_blog.blueprints.admin.models import AdminUser
 from marrow_blog.blueprints.api.v1.post_views import PostView
 from marrow_blog.blueprints.api.v1.upload_views import UploadView
+from marrow_blog.blueprints.page import page
+from marrow_blog.blueprints.up import up
+from marrow_blog.extensions import (
+    db,
+    flask_static_digest,
+    flat_pages,
+    login_manager,
+    marshmallow,
+)
 
 
 def create_celery_app(app=None):

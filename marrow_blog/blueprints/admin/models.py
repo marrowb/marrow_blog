@@ -1,8 +1,9 @@
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from marrow_blog.extensions import db
 from lib.util_sqlalchemy import ResourceMixin
+from marrow_blog.extensions import db
+
 
 class AdminUser(UserMixin, ResourceMixin, db.Model):
     __tablename__ = "admin_users"

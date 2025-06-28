@@ -44,7 +44,11 @@ FLATPAGES_MARKDOWN_EXTENSIONS = [
     "markdown.extensions.attr_list",  # For attributes
 ]
 FLATPAGES_EXTENSION_CONFIGS = {
-    "codehilite": {"css_class": "highlight", "linenums": False, "guess_lang": False},
+    "codehilite": {
+        "css_class": "highlight",
+        "linenums": False,
+        "guess_lang": False,
+    },
     "pymdownx.highlight": {
         "use_pygments": True,
         "css_class": "highlight",

@@ -1,10 +1,8 @@
-import pytest
 import pyotp
 from flask import url_for
 
-from marrow_blog.blueprints.admin.models import AdminUser
-from marrow_blog.blueprints.posts.models import Post
 from lib.tests import ViewTestMixin, assert_status_with_message
+from marrow_blog.blueprints.posts.models import Post
 
 
 class TestAdminLogin(ViewTestMixin):
@@ -85,7 +83,9 @@ class TestAdminLogin(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Try to access login page
-        response = self.client.get(url_for("admin.login"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.login"), follow_redirects=True
+        )
 
         assert_status_with_message(
             status_code=200, response=response, message="Admin Dashboard"
@@ -109,7 +109,7 @@ class TestAdminMFA(ViewTestMixin):
         """Test MFA-enabled user requires token."""
         data = {
             "username": "test_admin_mfa",
-            "password": "password"
+            "password": "password",
             # No MFA token provided
         }
 
@@ -144,7 +144,9 @@ class TestAdminMFA(ViewTestMixin):
             status_code=200, response=response, message="Admin Dashboard"
         )
         assert_status_with_message(
-            status_code=200, response=response, message="Welcome, test_admin_mfa!"
+            status_code=200,
+            response=response,
+            message="Welcome, test_admin_mfa!",
         )
 
     def test_mfa_with_invalid_token_rejects_login(self):
@@ -212,7 +214,9 @@ class TestAdminLogout(ViewTestMixin):
 
     def test_logout_requires_authentication(self):
         """Test GET /logout requires authentication."""
-        response = self.client.get(url_for("admin.logout"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.logout"), follow_redirects=True
+        )
 
         # Should redirect to login page
         assert_status_with_message(
@@ -225,10 +229,14 @@ class TestAdminLogout(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Then logout
-        response = self.client.get(url_for("admin.logout"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.logout"), follow_redirects=True
+        )
 
         assert_status_with_message(
-            status_code=200, response=response, message="You have been logged out"
+            status_code=200,
+            response=response,
+            message="You have been logged out",
         )
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
@@ -257,7 +265,9 @@ class TestAdminLogout(ViewTestMixin):
         self.client.get(url_for("admin.logout"))
 
         # Verify cannot access protected route
-        response = self.client.get(url_for("admin.dashboard"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.dashboard"), follow_redirects=True
+        )
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
         )
@@ -268,7 +278,9 @@ class TestAdminDashboard(ViewTestMixin):
 
     def test_dashboard_requires_authentication(self):
         """Test GET /dashboard requires authentication."""
-        response = self.client.get(url_for("admin.dashboard"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.dashboard"), follow_redirects=True
+        )
 
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
@@ -316,7 +328,9 @@ class TestAdminPostEditor(ViewTestMixin):
 
     def test_post_editor_requires_authentication(self):
         """Test GET /post requires authentication."""
-        response = self.client.get(url_for("admin.post"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.post"), follow_redirects=True
+        )
 
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
@@ -422,7 +436,9 @@ class TestAdminUpload(ViewTestMixin):
 
     def test_upload_form_requires_authentication(self):
         """Test GET /upload-doc requires authentication."""
-        response = self.client.get(url_for("admin.upload_doc"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.upload_doc"), follow_redirects=True
+        )
 
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
@@ -452,7 +468,9 @@ class TestAdminUpload(ViewTestMixin):
 
     def test_upload_post_requires_authentication(self):
         """Test POST /upload-doc requires authentication."""
-        response = self.client.post(url_for("admin.upload_doc"), follow_redirects=True)
+        response = self.client.post(
+            url_for("admin.upload_doc"), follow_redirects=True
+        )
 
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
@@ -503,7 +521,9 @@ class TestAuthRequired(ViewTestMixin):
     def test_session_management_works(self):
         """Test Flask-Login session management works correctly."""
         # Not logged in - should redirect
-        response = self.client.get(url_for("admin.dashboard"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.dashboard"), follow_redirects=True
+        )
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
         )
@@ -519,7 +539,9 @@ class TestAuthRequired(ViewTestMixin):
         self.logout_admin()
 
         # Should redirect again
-        response = self.client.get(url_for("admin.dashboard"), follow_redirects=True)
+        response = self.client.get(
+            url_for("admin.dashboard"), follow_redirects=True
+        )
         assert_status_with_message(
             status_code=200, response=response, message="Admin Login"
         )

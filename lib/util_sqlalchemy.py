@@ -5,11 +5,13 @@ from sqlalchemy.types import TypeDecorator
 
 from marrow_blog.extensions import db
 
+
 def tzware_datetime():
     """
     Return a timezone aware datetime.
     """
     return datetime.datetime.now(datetime.timezone.utc)
+
 
 class AwareDateTime(TypeDecorator):
     impl = DateTime(timezone=True)
@@ -22,6 +24,7 @@ class AwareDateTime(TypeDecorator):
 
     def __repr__(self):
         return "AwareDateTime()"
+
 
 class ResourceMixin(object):
     created_on = db.Column(AwareDateTime(), default=tzware_datetime)

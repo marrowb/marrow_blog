@@ -1,6 +1,3 @@
-import os
-from importlib.metadata import version
-
 from flask import Blueprint, render_template
 from flask_flatpages.utils import pygmented_markdown
 

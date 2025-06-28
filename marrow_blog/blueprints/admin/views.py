@@ -1,14 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask import current_app
-from flask_login import login_user, logout_user, login_required, current_user
 import pyotp  # Uncomment if you implement pyotp for MFA
-from werkzeug.utils import secure_filename
+from flask import Blueprint, flash, redirect, render_template, url_for
+from flask_login import current_user, login_required, login_user, logout_user
+
+from lib.document_processor import PostManager
+from marrow_blog.blueprints.posts.models import Post
 
 from .forms import LoginForm, UploadForm
 from .models import AdminUser
-from marrow_blog.blueprints.posts.models import Post
-from marrow_blog.extensions import db
-from lib.document_processor import PostManager
 
 admin = Blueprint("admin", __name__, template_folder="templates")
 
@@ -24,11 +22,15 @@ def login():
             if user.is_mfa_enabled:
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
-                    return render_template("login.html", form=form, title="Admin Login")
+                    return render_template(
+                        "login.html", form=form, title="Admin Login"
+                    )
                 totp = pyotp.TOTP(user.mfa_secret)  # Uncomment for pyotp
                 if not totp.verify(form.token.data):
                     flash("Invalid MFA token.", "error")
-                    return render_template("login.html", form=form, title="Admin Login")
+                    return render_template(
+                        "login.html", form=form, title="Admin Login"
+                    )
                 # flash("MFA check placeholder: Successful (if token was provided and valid).", "info") # Placeholder
 
             login_user(user)
@@ -107,4 +109,6 @@ def upload_doc():
         if success and post:
             return redirect(url_for("admin.post", post_id=post.id))
 
-    return render_template("upload_doc.html", title="Upload Document", form=form)
+    return render_template(
+        "upload_doc.html", title="Upload Document", form=form
+    )

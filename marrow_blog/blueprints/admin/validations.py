@@ -1,5 +1,5 @@
-from wtforms.validators import ValidationError
 from flask import current_app
+from wtforms.validators import ValidationError
 
 
 def allowed_file(form, field):
