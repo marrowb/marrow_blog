@@ -4,14 +4,14 @@ set -e
 
 # Always keep this here as it ensures your latest built assets make their way
 # into your volume persisted public directory.
-cp -r /public /app 
+cp -r /public /app
 
 # Ensure uploads directory exists
 mkdir -p /app/data/uploads
 
 # Create symlink if it doesn't exist
 if [ ! -L /app/public/uploads ]; then
-    ln -sf /app/data/uploads /app/public/uploads
+  ln -sf /app/data/uploads /app/public/uploads
 fi
 
 exec "$@"
