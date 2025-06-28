@@ -1,9 +1,8 @@
+{% set title = title %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>
-            {% block title %}{% endblock %}
-        </title>
+        <title>{{ title }}</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width" />
         <link rel="stylesheet"
@@ -13,14 +12,13 @@
     <body>
         <noscript><strong>Please enable JavaScript to view this page correctly.</strong></noscript>
         <header>
-            title and navigation ...
+            {% block header %}{% endblock %}
         </header>
         <main>
-            main content ...
             {% block body %}{% endblock %}
         </main>
         <footer>
-            byline and copyright ...
+            © Brandon Marrow 2025
         </footer>
         <script type="module"
                 src="{{ static_url_for('static', filename='index.js') }}"></script>
