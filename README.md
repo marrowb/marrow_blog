@@ -1,21 +1,10 @@
-# 🐳 An example Flask + Docker app
+# 📝 Marrow Blog - A Flask Blog Platform
 
-You could use this example app as a base for your new project or as a guide to
-Dockerize your existing Flask app.
+> **Built on the excellent foundation of [Nick Janetakis' docker-flask-example](https://github.com/nickjj/docker-flask-example)**
 
-The example app is minimal but it wires up a number of things you might use in
-a real world Flask app, but at the same time it's not loaded up with a million
-personal opinions.
+A complete blog platform built with Flask, featuring admin authentication, markdown editing with [TinyMDE](https://github.com/jefago/tiny-markdown-editor), and SQLite storage. This project transforms Nick's minimal Flask template into a fully-featured content management system.
 
-For the Docker bits, everything included is an accumulation of [Docker best
-practices](https://nickjanetakis.com/blog/best-practices-around-production-ready-web-apps-with-docker-compose)
-based on building and deploying dozens of assorted Dockerized web apps since
-late 2014.
-
-**This app is using Flask 3.1.0 and Python 3.13.3**. The screenshot shows
-`X.X.X` since they get updated regularly:
-
-[![Screenshot](.github/docs/screenshot.jpg)](https://github.com/nickjj/docker-flask-example/blob/main/.github/docs/screenshot.jpg?raw=true)
+The blog platform includes admin authentication, post management, RESTful APIs, file uploads, and deployment to Fly.io.
 
 ## 🧾 Table of contents
 
@@ -40,70 +29,72 @@ out for something else on your own.
 
 ### Back-end
 
-- [PostgreSQL](https://www.postgresql.org/)
-- [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy)
-- [Redis](https://redis.io/)
-- [Celery](https://github.com/celery/celery)
+- [SQLite](https://www.sqlite.org/) with persistent volume storage
+- [SQLAlchemy](https://github.com/sqlalchemy/sqlalchemy) ORM with Alembic migrations
+- [Flask-Login](https://flask-login.readthedocs.io/) for authentication
+- [Celery](https://github.com/celery/celery) with SQLite broker backend
 
 ### Front-end
 
-- [esbuild](https://esbuild.github.io/)
-- [TailwindCSS](https://tailwindcss.com/)
-- [Heroicons](https://heroicons.com/)
+- Vanilla CSS & JS inspired by [Plain Vanilla](https://plainvanillaweb.com)
 
-#### But what about JavaScript?!
+### Content Management
 
-Picking a JS library is a very app specific decision because it depends on
-which library you like and it also depends on if your app is going to be
-mostly Jinja templates with sprinkles of JS or an API back-end.
+- [TinyMDE](https://github.com/jefago/tiny-markdown-editor) - Lightweight markdown editor
+- [Flask-FlatPages](https://flask-flatpages.readthedocs.io/) for markdown processing
+- [Pygments](https://pygments.org/) for syntax highlighting
+- [Python-Frontmatter](https://python-frontmatter.readthedocs.io/) for metadata parsing
 
-This isn't an exhaustive list but here's a few reasonable choices depending on
-how you're building your app:
+### API & Forms
 
-- <https://hotwired.dev/>
-- <https://htmx.org/>
-- <https://github.com/alpinejs/alpine>
-- <https://vuejs.org/>
-- <https://reactjs.org/>
-- <https://jquery.com/>
+- [Flask-Classful](https://flask-classful.readthedocs.io/) for RESTful APIs  
+- [Marshmallow](https://marshmallow.readthedocs.io/) for serialization
+- [Flask-WTF](https://flask-wtf.readthedocs.io/) for form handling
 
-On the bright side with esbuild being set up you can use any (or none) of these
-solutions very easily. You could follow a specific library's installation
-guides to get up and running in no time.
+## 🚀 Blog Platform Features
 
-Personally I'm going to be using Hotwire Turbo + Stimulus in most newer
-projects.
+This blog platform extends Flask with a complete content management system while maintaining clean architecture and development best practices.
 
-## 🍣 Notable opinions and extensions
+### 🔐 Authentication & Security
+- **Admin Authentication**: Secure login system with session management
+- **Two-Factor Authentication**: Optional MFA using TOTP (PyOTP)
+- **Password Security**: Werkzeug password hashing with salt
+- **Protected Routes**: Login-required decorators for admin functionality
 
-Flask is a very unopinionated framework but I find in most apps I'm adding the
-same things over and over. Here's a few (but not all) note worthy additions
-and changes.
+### 📝 Content Management
+- **Blog Post System**: Create, edit, and manage blog posts with rich metadata
+- **Markdown Editor**: [TinyMDE](https://github.com/jefago/tiny-markdown-editor) integration for intuitive editing
+- **Syntax Highlighting**: Pygments-powered code highlighting in posts
+- **SEO-Friendly URLs**: Automatic slug generation from titles
+- **Tagging System**: Organize posts with comma-separated tags
+- **Draft/Publish Workflow**: Preview posts before publishing
 
-- **Packages and extensions**:
-    - *[gunicorn](https://gunicorn.org/)* for an app server in both development and production
-    - *[Flask-DB](https://github.com/nickjj/flask-db)* to help manage, migrate and seed your database
-    - *[Flask-Static-Digest](https://github.com/nickjj/flask-static-digest)* to md5 tag and gzip your static files (and add optional CDN support)
-    - *[Flask-Secrets](https://github.com/nickjj/flask-secrets)* to quickly generate secure random tokens you can use for various things
-    - *[Flask-DebugToolbar](https://github.com/flask-debugtoolbar/flask-debugtoolbar)* to show useful information for debugging
-- **Linting, formatting and testing**:
-    - *[ruff](https://github.com/astral-sh/ruff)* is used to lint and format the code base
-    - *[pytest](https://github.com/pytest-dev/pytest)* and *pytest-cov* for writing tests and reporting test coverage
-- **Blueprints**:
-    - Add `page` blueprint to render a `/` page
-    - Add `up` blueprint to provide a few health check pages
-- **Config**:
-    - Log to STDOUT so that Docker can consume and deal with log output
-    - Extract a bunch of configuration settings into environment variables
-    - `config/settings.py` and the `.env` file handles configuration in all environments
-- **Front-end assets**:
-    - `assets/` contains all your CSS, JS, images, fonts, etc. and is managed by esbuild
-    - Custom `502.html` and `maintenance.html` pages
-    - Generate favicons using modern best practices
-- **Flask defaults that are changed**:
-    - `public/` is the static directory where Flask will serve static files from
-    - `static_url_path` is set to `""` to remove the `/static` URL prefix for static files
-    - `ProxyFix` middleware is enabled (check `marrow_blog/app.py`)
+### 🔌 RESTful API
+- **Post Management**: Full CRUD operations via `/api/v1/post/`
+- **File Uploads**: Document upload handling via `/api/v1/upload/`
+- **JSON Serialization**: Marshmallow schemas for clean data validation
+- **Error Handling**: Consistent API error responses
+
+### 🖥️ Admin Interface
+- **Dashboard**: Overview of all posts with management controls
+- **Post Editor**: Rich editing interface with markdown preview
+- **File Upload**: Support for `.md` file imports with frontmatter
+- **User Management**: CLI commands for creating admin users
+
+### 🏗️ Technical Foundation
+- **Database**: SQLite with Alembic migrations for schema management
+- **Forms**: Flask-WTF with comprehensive validation
+- **Static Assets**: esbuild + TailwindCSS with file fingerprinting
+- **Testing**: Comprehensive test suite with pytest and coverage
+- **Linting**: Ruff for code formatting and quality
+- **Development Tools**: Custom `./run` script for common tasks
+
+### 🚢 Production Ready
+- **Fly.io Deployment**: Complete configuration for cloud deployment
+- **Persistent Storage**: 20GB volume for SQLite database and uploads
+- **Auto-scaling**: Configured machine start/stop based on traffic
+- **Health Checks**: Monitoring endpoints for service health
+- **CI/CD**: GitHub Actions for automated deployment
 
 Besides the Flask app itself:
 
@@ -137,10 +128,8 @@ these commands for PowerShell if you want.
 #### Clone this repo anywhere you want and move into the directory:
 
 ```sh
-git clone https://github.com/nickjj/docker-flask-example marrow_blog
+git clone https://github.com/YOUR_USERNAME/blog-sqlite marrow_blog
 cd marrow_blog
-
-# Optionally checkout a specific tag, such as: git checkout 0.12.0
 ```
 
 #### Copy an example .env file because the real one is git ignored:
@@ -179,15 +168,26 @@ variables to fix this.
 
 ```sh
 # You can run this from a 2nd terminal. It will create both a development and
-# test database with the proper user / password credentials.
+# test database with sample blog posts.
 ./run flask db reset --with-testdb
+```
+
+#### Create an admin user:
+
+```sh
+# Create an admin user to access the blog dashboard
+./run admin create --username admin --password yourpassword
+
+# Or with MFA enabled
+./run admin create --username admin --password yourpassword --enable-mfa
 ```
 
 *We'll go over that `./run` script in a bit!*
 
 #### Check it out in a browser:
 
-Visit <http://localhost:8000> in your favorite browser.
+Visit <http://localhost:8000> in your favorite browser to see the blog.  
+Visit <http://localhost:8000/login> to access the admin dashboard.
 
 #### Linting the code base:
 
@@ -259,89 +259,58 @@ functions as you want. This file's purpose is to make your experience better!
 `alias run=./run` in your `~/.bash_aliases` or equivalent file. Then you'll be
 able to run `run` instead of `./run`.*
 
-## ✨ Running a script to automate renaming the project
+## 📖 Using the Blog Platform
 
-The app is named `marrow_blog` right now but chances are your app will be a different
-name. Since the app is already created we'll need to do a find / replace on a
-few variants of the string "marrow_blog" and update a few Docker related resources.
+### Creating and Managing Content
 
-And by we I mean I created a zero dependency shell script that does all of the
-heavy lifting for you. All you have to do is run the script below.
+#### Admin Dashboard
+After logging in at `/login`, you'll have access to:
+- **Dashboard**: Overview of all posts with quick actions
+- **Create Post**: Rich markdown editor with TinyMDE
+- **Upload Documents**: Import `.md` files with frontmatter support
+- **Preview**: See how posts look before publishing
 
-#### Run the rename-project script included in this repo:
+#### Writing Posts
+The blog supports rich markdown with frontmatter metadata:
 
-```sh
-# The script takes 2 arguments.
-#
-# The first one is the lower case version of your app's name, such as myapp or
-# my_app depending on your preference.
-#
-# The second one is used for your app's module name. For example if you used
-# myapp or my_app for the first argument you would want to use MyApp here.
-bin/rename-project myapp MyApp
+```markdown
+---
+title: "My Blog Post"
+excerpt: "A brief description"
+tags: "flask, python, web development"
+published: true
+---
+
+# Your content here
+
+Code blocks are highlighted:
+
+```python
+def hello():
+    return "Hello, World!"
+``` 
 ```
 
-The [bin/rename-project
-script](https://github.com/nickjj/docker-flask-example/blob/main/bin/rename-project)
-is going to:
+#### Using the API
+The RESTful API provides programmatic access:
 
-- Remove any Docker resources for your current project
-- Perform a number of find / replace actions
-- Optionally initialize a new git repo for you
+```bash
+# Get all published posts
+curl http://localhost:8000/api/v1/post/
 
-*Afterwards you can delete this script because its only purpose is to assist in
-helping you change this project's name without depending on any complicated
-project generator tools or 3rd party dependencies.*
-
-If you're not comfy running the script or it doesn't work for whatever reasons
-you can [check it
-out](https://github.com/nickjj/docker-flask-example/blob/main/bin/rename-project)
-and perform the actions manually. It's mostly running a find / replace across
-files and then renaming a few directories and files.
-
-#### Start and setup the project:
-
-This won't take as long as before because Docker can re-use most things. We'll
-also need to setup our database since a new one will be created for us by
-Docker.
-
-```sh
-docker compose up --build
-
-# Then in a 2nd terminal once it's up and ready.
-./run flask db reset --with-testdb
+# Create a new post (requires authentication)
+curl -X POST http://localhost:8000/api/v1/post/ \
+  -H "Content-Type: application/json" \
+  -d '{"title": "New Post", "content": "# Hello World"}'
 ```
 
-#### Sanity check to make sure the tests still pass:
+### Customizing Your Blog
 
-It's always a good idea to make sure things are in a working state before
-adding custom changes.
-
-```sh
-# You can run this from the same terminal as before.
-./run quality
-./run test
-```
-
-If everything passes now you can optionally `git add -A && git commit -m
-"Initial commit"` and start customizing your app. Alternatively you can wait
-until you develop more of your app before committing anything. It's up to you!
-
-#### Tying up a few loose ends:
-
-You'll probably want to create a fresh `CHANGELOG.md` file for your project. I
-like following the style guide at <https://keepachangelog.com/> but feel free
-to use whichever style you prefer.
-
-Since this project is MIT licensed you should keep my name and email address in
-the `LICENSE` file to adhere to that license's agreement, but you can also add
-your name and email on a new line.
-
-If you happen to base your app off this example app or write about any of the
-code in this project it would be rad if you could credit this repo by linking
-to it. If you want to reference me directly please link to my site at
-<https://nickjanetakis.com>. You don't have to do this, but it would be very
-much appreciated!
+If you want to customize the blog name, colors, or structure, the key files are:
+- `marrow_blog/` - Main application code
+- `public/styles/` - CSS customization
+- `marrow_blog/templates/` - HTML templates
+- `config/settings.py` - Application configuration
 
 ## 🛠 Updating dependencies
 
@@ -392,43 +361,56 @@ pipeline which is similar to how it would work in CI.
 If you see anything that could be improved please open an issue or start a PR.
 Any help is much appreciated!
 
-## 🌎 Additional resources
+## 🚢 Deployment
 
-Now that you have your app ready to go, it's time to build something cool! If
-you want to learn more about Docker, Flask and deploying a Flask app here's a
-couple of free and paid resources. There's Google too!
+### Fly.io Deployment (Recommended)
 
-### Learn more about Docker and Flask
+This blog is configured for deployment to Fly.io with persistent storage:
 
-#### Official documentation
+```sh
+# Install Fly CLI
+curl -L https://fly.io/install.sh | sh
 
-- <https://docs.docker.com/>
-- <https://flask.palletsprojects.com/>
+# Login to Fly.io
+flyctl auth login
 
-#### Courses
+# Deploy the application
+flyctl deploy
+```
 
-- [https://diveintodocker.com](https://diveintodocker.com?ref=docker-flask-example)
-  is a course I created which goes over the Docker and Docker Compose
-  fundamentals
-- [https://buildasaasappwithflask.com](https://buildasaasappwithflask.com?ref=docker-flask-example)
-  is a course I created where we build a real world SAAS app with Flask
+The app includes:
+- **Persistent Storage**: 20GB volume for SQLite database and uploads
+- **Auto-scaling**: Machines start/stop automatically based on traffic
+- **Health Checks**: Built-in monitoring endpoints
+- **CI/CD**: GitHub Actions for automated deployment
 
-### Deploy to production
+### Manual Deployment
 
-I'm creating an in-depth course related to deploying Dockerized web apps. If
-you want to get notified when it launches with a discount and potentially get
-free videos while the course is being developed then [sign up here to get
-notified](https://nickjanetakis.com/courses/deploy-to-production).
+For other platforms, the application requires:
+- Python 3.13+ environment
+- Persistent storage for SQLite database
+- Environment variables from `.env.example`
+- Static file serving capability
 
-## 👀 About the author
+## 🌎 Additional Resources
 
-- Nick Janetakis | <https://nickjanetakis.com> | [@nickjanetakis](https://twitter.com/nickjanetakis)
+### Official Documentation
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [Docker Documentation](https://docs.docker.com/)
+- [SQLite Documentation](https://www.sqlite.org/docs.html)
+- [TinyMDE Documentation](https://github.com/jefago/tiny-markdown-editor)
 
-I'm a self taught developer and have been freelancing for the last ~20 years.
-You can read about everything I've learned along the way on my site at
-[https://nickjanetakis.com](https://nickjanetakis.com/).
+## 🙏 Credits & Attribution
 
-There's hundreds of [blog posts](https://nickjanetakis.com/blog) and a couple
-of [video courses](https://nickjanetakis.com/courses) on web development and
-deployment topics. I also have a [podcast](https://runninginproduction.com)
-where I talk with folks about running web apps in production.
+### Original Template
+This blog platform is built on the excellent foundation of **[Nick Janetakis' docker-flask-example](https://github.com/nickjj/docker-flask-example)**. Nick's template provides outstanding Docker configuration, development workflows, and Flask best practices that made this project possible.
+
+- **Nick Janetakis** | [nickjanetakis.com](https://nickjanetakis.com) | [@nickjanetakis](https://twitter.com/nickjanetakis)
+
+### Key Dependencies
+- **[TinyMDE](https://github.com/jefago/tiny-markdown-editor)** by jefago - The lightweight markdown editor that powers the blog's content creation
+- **[Flask](https://flask.palletsprojects.com/)** - The web framework that makes it all possible
+- **[SQLite](https://www.sqlite.org/)** - Reliable, file-based database storage
+
+### Blog Platform
+This fork transforms the original template into a complete blogging platform with authentication, content management, and deployment capabilities. While maintaining the excellent development practices and Docker setup from the original, it adds a full-featured CMS suitable for production use.
