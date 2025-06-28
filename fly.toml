@@ -29,6 +29,11 @@ primary_region  =  'ewr'
   DOCKER_RESTART_POLICY = 'unless-stopped'
   DOCKER_WEB_HEALTHCHECK_TEST = 'curl localhost:8000/up'
   SERVER_NAME = 'marrow-blog.fly.dev'
+  DOCKER_WEB_CPUS=1
+  DOCKER_WORKER_CPUS=1
+  DOCKER_WEB_MEMORY=1
+  DOCKER_WORKER_MEMORY=.5
+
 
 [[mounts]]
   source = 'mblog_data'
