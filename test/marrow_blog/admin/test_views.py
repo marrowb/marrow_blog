@@ -477,6 +477,263 @@ class TestAdminUpload(ViewTestMixin):
         )
 
 
+class TestAdminPublish(ViewTestMixin):
+    """Test admin publish functionality."""
+
+    def test_publish_requires_authentication(self):
+        """Test GET /publish/<id> requires authentication."""
+        post = Post.query.filter_by(slug="draft-post").first()
+
+        response = self.client.get(
+            url_for("admin.publish", post_id=post.id), follow_redirects=True
+        )
+
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Login"
+        )
+
+    def test_publish_draft_post_success(self):
+        """Test /publish/<id> successfully publishes draft post."""
+        self.login_admin("test_admin")
+        
+        # Get a draft post from fixtures
+        draft_post = Post.query.filter_by(slug="draft-post").first()
+        assert draft_post.published is False  # Verify it's a draft
+        
+        response = self.client.get(
+            url_for("admin.publish", post_id=draft_post.id)
+        )
+        
+        # Should redirect to the published post
+        assert response.status_code == 302
+        assert f"/blog/{draft_post.slug}" in response.location
+        
+        # Verify post is now published in database
+        updated_post = Post.query.get(draft_post.id)
+        assert updated_post.published is True
+
+    def test_publish_already_published_post(self):
+        """Test /publish/<id> works on already published posts."""
+        self.login_admin("test_admin")
+        
+        # Get a published post from fixtures
+        published_post = Post.query.filter_by(slug="test-post-1").first()
+        assert published_post.published is True  # Verify it's already published
+        
+        response = self.client.get(
+            url_for("admin.publish", post_id=published_post.id)
+        )
+        
+        # Should still redirect successfully
+        assert response.status_code == 302
+        assert f"/blog/{published_post.slug}" in response.location
+        
+        # Verify post remains published
+        updated_post = Post.query.get(published_post.id)
+        assert updated_post.published is True
+
+    def test_publish_nonexistent_post(self):
+        """Test /publish/<id> returns 404 for non-existent post."""
+        self.login_admin("test_admin")
+        
+        response = self.client.get(url_for("admin.publish", post_id=99999))
+        
+        assert response.status_code == 404
+
+    def test_publish_redirect_to_blog_post(self):
+        """Test /publish/<id> redirects to the published blog post."""
+        self.login_admin("test_admin")
+        
+        draft_post = Post.query.filter_by(slug="draft-post").first()
+        
+        response = self.client.get(
+            url_for("admin.publish", post_id=draft_post.id)
+        )
+        
+        # Should redirect to page.blog_post with the slug
+        assert response.status_code == 302
+        expected_url = url_for("page.blog_post", slug=draft_post.slug)
+        assert expected_url in response.location
+
+
+class TestAdminDelete(ViewTestMixin):
+    """Test admin delete functionality."""
+
+    def test_delete_requires_authentication(self):
+        """Test GET /delete/<id> requires authentication."""
+        post = Post.query.filter_by(slug="test-post-1").first()
+
+        response = self.client.get(
+            url_for("admin.delete", post_id=post.id), follow_redirects=True
+        )
+
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Login"
+        )
+
+    def test_delete_post_success(self):
+        """Test /delete/<id> successfully deletes post."""
+        self.login_admin("test_admin")
+        
+        # Create a post to delete (don't use fixtures to avoid affecting other tests)
+        from marrow_blog.blueprints.admin.models import AdminUser
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        
+        test_post = Post(
+            title="Post to Delete via View",
+            slug="post-to-delete-via-view",
+            markdown_content="Content to delete",
+            author_id=admin.id
+        )
+        test_post.save()
+        post_id = test_post.id
+        
+        response = self.client.get(
+            url_for("admin.delete", post_id=post_id), follow_redirects=True
+        )
+        
+        # Should redirect to dashboard 
+        assert response.status_code == 200
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Dashboard"
+        )
+        
+        # Verify post was deleted from database
+        deleted_post = Post.query.get(post_id)
+        assert deleted_post is None
+
+    def test_delete_nonexistent_post(self):
+        """Test /delete/<id> returns 404 for non-existent post."""
+        self.login_admin("test_admin")
+        
+        response = self.client.get(url_for("admin.delete", post_id=99999))
+        
+        assert response.status_code == 404
+
+    def test_delete_published_post(self):
+        """Test /delete/<id> can delete published posts."""
+        self.login_admin("test_admin")
+        
+        # Create a published post to delete
+        from marrow_blog.blueprints.admin.models import AdminUser
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        
+        test_post = Post(
+            title="Published Post to Delete via View",
+            slug="published-post-to-delete-via-view",
+            markdown_content="Published content",
+            published=True,
+            author_id=admin.id
+        )
+        test_post.save()
+        post_id = test_post.id
+        
+        response = self.client.get(
+            url_for("admin.delete", post_id=post_id), follow_redirects=True
+        )
+        
+        # Should redirect to dashboard
+        assert response.status_code == 200
+        
+        # Verify post was deleted
+        deleted_post = Post.query.get(post_id)
+        assert deleted_post is None
+
+
+class TestAdminRetract(ViewTestMixin):
+    """Test admin retract functionality."""
+
+    def test_retract_requires_authentication(self):
+        """Test GET /retract/<id> requires authentication."""
+        post = Post.query.filter_by(slug="test-post-1").first()
+
+        response = self.client.get(
+            url_for("admin.retract", post_id=post.id), follow_redirects=True
+        )
+
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Login"
+        )
+
+    def test_retract_published_post_success(self):
+        """Test /retract/<id> successfully retracts published post."""
+        self.login_admin("test_admin")
+        
+        # Create a published post to retract
+        from marrow_blog.blueprints.admin.models import AdminUser
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        
+        test_post = Post(
+            title="Published Post to Retract",
+            slug="published-post-to-retract-via-view",
+            markdown_content="Published content",
+            published=True,
+            author_id=admin.id
+        )
+        test_post.save()
+        post_id = test_post.id
+        
+        response = self.client.get(
+            url_for("admin.retract", post_id=post_id), follow_redirects=True
+        )
+        
+        # Should redirect to dashboard
+        assert response.status_code == 200
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Dashboard"
+        )
+        
+        # Verify post is now a draft in database
+        retracted_post = Post.query.get(post_id)
+        assert retracted_post is not None
+        assert retracted_post.published is False
+
+    def test_retract_draft_post_shows_info(self):
+        """Test /retract/<id> shows info message for already draft posts."""
+        self.login_admin("test_admin")
+        
+        # Get a draft post from fixtures
+        draft_post = Post.query.filter_by(slug="draft-post").first()
+        assert draft_post.published is False  # Verify it's a draft
+        
+        response = self.client.get(
+            url_for("admin.retract", post_id=draft_post.id), follow_redirects=True
+        )
+        
+        # Should redirect to dashboard
+        assert response.status_code == 200
+        assert_status_with_message(
+            status_code=200, response=response, message="Admin Dashboard"
+        )
+        
+        # Verify post remains a draft
+        post_check = Post.query.get(draft_post.id)
+        assert post_check.published is False
+
+    def test_retract_nonexistent_post(self):
+        """Test /retract/<id> returns 404 for non-existent post."""
+        self.login_admin("test_admin")
+        
+        response = self.client.get(url_for("admin.retract", post_id=99999))
+        
+        assert response.status_code == 404
+
+    def test_retract_redirect_to_dashboard(self):
+        """Test /retract/<id> redirects to dashboard."""
+        self.login_admin("test_admin")
+        
+        # Get a published post
+        published_post = Post.query.filter_by(slug="test-post-1").first()
+        
+        response = self.client.get(
+            url_for("admin.retract", post_id=published_post.id)
+        )
+        
+        # Should redirect to dashboard
+        assert response.status_code == 302
+        assert "/dashboard" in response.location
+
+
 class TestAuthRequired(ViewTestMixin):
     """Test authentication requirements across admin routes."""
 
