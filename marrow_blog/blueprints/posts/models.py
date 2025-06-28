@@ -1,6 +1,6 @@
-from marrow_blog.extensions import db
 from lib.util_sqlalchemy import ResourceMixin
-from marrow_blog.blueprints.admin.models import AdminUser # This line is needed
+from marrow_blog.extensions import db
+
 
 class Post(ResourceMixin, db.Model):
     __tablename__ = "posts"
@@ -13,11 +13,13 @@ class Post(ResourceMixin, db.Model):
     published = db.Column(db.Boolean, default=False, nullable=False, index=True)
     tags = db.Column(db.String(500), nullable=True, index=True)
 
-    # Assuming AdminUser is defined in marrow_blog.blueprints.admin.models
     author_id = db.Column(db.Integer, db.ForeignKey('admin_users.id'), nullable=False)
     author = db.relationship('AdminUser', backref=db.backref('posts', lazy='dynamic'))
 
-    # created_on and updated_on are inherited from ResourceMixin
+
+    @classmethod
+    def get_recent_posts(cls):
+        return cls.query.filter_by(published=True).order_by(cls.created_on.desc()).limit(5).all()
 
     @property
     def tag_list(self):
