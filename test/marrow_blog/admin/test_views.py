@@ -2,6 +2,7 @@ import pyotp
 from flask import url_for
 
 from lib.tests import ViewTestMixin, assert_status_with_message
+from marrow_blog.blueprints.admin.models import AdminUser
 from marrow_blog.blueprints.posts.models import Post
 
 
@@ -496,20 +497,26 @@ class TestAdminPublish(ViewTestMixin):
         """Test /publish/<id> successfully publishes draft post."""
         self.login_admin("test_admin")
 
-        # Get a draft post from fixtures
-        draft_post = Post.query.filter_by(slug="draft-post").first()
-        assert draft_post.published is False  # Verify it's a draft
-
-        response = self.client.get(
-            url_for("admin.publish", post_id=draft_post.id)
+        # Create a dedicated draft post for this test
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        test_post = Post(
+            title="Draft Post to Publish",
+            slug="draft-post-to-publish",
+            markdown_content="Draft content",
+            published=False,
+            author_id=admin.id,
         )
+        test_post.save()
+        post_id = test_post.id
+
+        response = self.client.get(url_for("admin.publish", post_id=post_id))
 
         # Should redirect to the published post
         assert response.status_code == 302
-        assert f"/blog/{draft_post.slug}" in response.location
+        assert f"/blog/{test_post.slug}" in response.location
 
         # Verify post is now published in database
-        updated_post = Post.query.get(draft_post.id)
+        updated_post = Post.query.get(post_id)
         assert updated_post.published is True
 
     def test_publish_already_published_post(self):
@@ -546,16 +553,25 @@ class TestAdminPublish(ViewTestMixin):
         """Test /publish/<id> redirects to the published blog post."""
         self.login_admin("test_admin")
 
-        draft_post = Post.query.filter_by(slug="draft-post").first()
+        # Create a dedicated draft post for this test
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        test_post = Post(
+            title="Draft Post for Redirect Test",
+            slug="draft-post-for-redirect-test",
+            markdown_content="Draft content",
+            published=False,
+            author_id=admin.id,
+        )
+        test_post.save()
 
         response = self.client.get(
-            url_for("admin.publish", post_id=draft_post.id)
+            url_for("admin.publish", post_id=test_post.id)
         )
 
         # Should redirect to page.blog_post with the slug
         assert response.status_code == 302
-        expected_url = url_for("page.blog_post", slug=draft_post.slug)
-        assert expected_url in response.location
+        expected_path = f"/blog/{test_post.slug}"
+        assert response.location == expected_path
 
 
 class TestAdminDelete(ViewTestMixin):
@@ -728,11 +744,19 @@ class TestAdminRetract(ViewTestMixin):
         """Test /retract/<id> redirects to dashboard."""
         self.login_admin("test_admin")
 
-        # Get a published post
-        published_post = Post.query.filter_by(slug="test-post-1").first()
+        # Create a dedicated published post for this test
+        admin = AdminUser.query.filter_by(username="test_admin").first()
+        test_post = Post(
+            title="Published Post for Retract Test",
+            slug="published-post-for-retract-test",
+            markdown_content="Published content",
+            published=True,
+            author_id=admin.id,
+        )
+        test_post.save()
 
         response = self.client.get(
-            url_for("admin.retract", post_id=published_post.id)
+            url_for("admin.retract", post_id=test_post.id)
         )
 
         # Should redirect to dashboard

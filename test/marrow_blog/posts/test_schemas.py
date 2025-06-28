@@ -19,7 +19,10 @@ class TestPostSchema(ViewTestMixin):
     def test_post_schema_serialization(self, session):
         """Test PostSchema correctly serializes a Post model."""
         admin = AdminUser.query.filter_by(username="test_admin").first()
+        assert admin is not None, "test_admin fixture should exist"
+
         post = Post.query.filter_by(slug="test-post-1").first()
+        assert post is not None, "test-post-1 fixture should exist"
 
         result = post_schema.dump(post)
 

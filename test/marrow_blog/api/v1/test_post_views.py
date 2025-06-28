@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from lib.tests import ViewTestMixin
 from marrow_blog.blueprints.posts.models import Post
@@ -62,8 +63,9 @@ class TestPostViewCreate(ViewTestMixin):
         """Test POST /api/v1/post/ creates new post successfully."""
         self.login_admin("test_admin")
 
+        unique_id = str(uuid.uuid4())[:8]
         data = {
-            "title": "New API Post",
+            "title": f"New API Post {unique_id}",
             "markdown_content": "# Content\n\nTest content",
         }
 
@@ -75,11 +77,13 @@ class TestPostViewCreate(ViewTestMixin):
 
         assert response.status_code == 201
         response_data = response.get_json()
-        assert response_data["title"] == "New API Post"
+        assert response_data["title"] == f"New API Post {unique_id}"
         assert response_data["published"] is False  # Default
 
         # Verify post was created in database
-        created_post = Post.query.filter_by(title="New API Post").first()
+        created_post = Post.query.filter_by(
+            title=f"New API Post {unique_id}"
+        ).first()
         assert created_post is not None
 
     def test_create_post_invalid_data(self):
@@ -131,9 +135,10 @@ class TestPostViewDelete(ViewTestMixin):
         self.login_admin("test_admin")  # Post author
 
         # Create a post to delete (don't use fixtures to avoid affecting other tests)
+        unique_id = str(uuid.uuid4())[:8]
         new_post = Post(
-            title="Post to Delete",
-            slug="post-to-delete",
+            title=f"Post to Delete {unique_id}",
+            slug=f"post-to-delete-{unique_id}",
             markdown_content="Content to delete",
             author_id=1,  # test_admin's ID
         )
@@ -161,9 +166,10 @@ class TestPostViewDelete(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Create a published post to delete
+        unique_id = str(uuid.uuid4())[:8]
         new_post = Post(
-            title="Published Post to Delete",
-            slug="published-post-to-delete",
+            title=f"Published Post to Delete {unique_id}",
+            slug=f"published-post-to-delete-{unique_id}",
             markdown_content="Published content",
             published=True,
             author_id=1,  # test_admin's ID
@@ -223,9 +229,10 @@ class TestPostViewPatch(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Create a published post to retract
+        unique_id = str(uuid.uuid4())[:8]
         new_post = Post(
-            title="Published Post to Retract",
-            slug="published-post-to-retract",
+            title=f"Published Post to Retract {unique_id}",
+            slug=f"published-post-to-retract-{unique_id}",
             markdown_content="Published content",
             published=True,
             author_id=1,  # test_admin's ID
@@ -257,9 +264,10 @@ class TestPostViewPatch(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Create a draft post to publish
+        unique_id = str(uuid.uuid4())[:8]
         new_post = Post(
-            title="Draft Post to Publish",
-            slug="draft-post-to-publish",
+            title=f"Draft Post to Publish {unique_id}",
+            slug=f"draft-post-to-publish-{unique_id}",
             markdown_content="Draft content",
             published=False,
             author_id=1,  # test_admin's ID
@@ -290,13 +298,24 @@ class TestPostViewPatch(ViewTestMixin):
         """Test PATCH /api/v1/post/<id> handles version conflicts."""
         self.login_admin("test_admin")
 
-        post = Post.query.filter_by(slug="test-post-1").first()
+        # Create a post to test version conflict (don't modify fixtures)
+        unique_id = str(uuid.uuid4())[:8]
+        new_post = Post(
+            title=f"Version Test Post {unique_id}",
+            slug=f"version-test-post-{unique_id}",
+            markdown_content="Original content",
+            author_id=1,
+        )
+        new_post.save()
 
         # Use outdated timestamp to simulate conflict
         old_timestamp = "2020-01-01T12:00:00"
-        data = {"title": "Conflicted Update", "updated_on": old_timestamp}
+        data = {
+            "title": f"Conflicted Update {unique_id}",
+            "updated_on": old_timestamp,
+        }
         response = self.client.patch(
-            f"/api/v1/post/{post.id}/",
+            f"/api/v1/post/{new_post.id}/",
             data=json.dumps(data),
             content_type="application/json",
         )
@@ -310,9 +329,10 @@ class TestPostViewPatch(ViewTestMixin):
         self.login_admin("test_admin")
 
         # Create a post to update
+        unique_id = str(uuid.uuid4())[:8]
         new_post = Post(
-            title="Original Title",
-            slug="original-slug",
+            title=f"Original Title {unique_id}",
+            slug=f"original-slug-{unique_id}",
             markdown_content="Original content",
             author_id=1,
         )
@@ -322,7 +342,7 @@ class TestPostViewPatch(ViewTestMixin):
 
         # Update only title
         data = {
-            "title": "Updated Title Only",
+            "title": f"Updated Title Only {unique_id}",
             "updated_on": new_post.updated_on.isoformat(),
         }
         response = self.client.patch(
@@ -333,13 +353,13 @@ class TestPostViewPatch(ViewTestMixin):
 
         assert response.status_code == 200
         response_data = response.get_json()
-        assert response_data["title"] == "Updated Title Only"
+        assert response_data["title"] == f"Updated Title Only {unique_id}"
 
         # Verify other fields unchanged
         updated_post = Post.query.get(post_id)
-        assert updated_post.title == "Updated Title Only"
+        assert updated_post.title == f"Updated Title Only {unique_id}"
         assert updated_post.markdown_content == original_content
-        assert updated_post.slug == "original-slug"
+        assert updated_post.slug == f"original-slug-{unique_id}"
 
     def test_patch_post_not_found(self):
         """Test PATCH /api/v1/post/<id> returns 404 for non-existent post."""
@@ -361,16 +381,27 @@ class TestPostViewPatch(ViewTestMixin):
         """Test PATCH /api/v1/post/<id> works without updated_on field."""
         self.login_admin("test_admin")
 
-        post = Post.query.filter_by(slug="test-post-1").first()
+        # Create a post to update (don't modify fixtures)
+        unique_id = str(uuid.uuid4())[:8]
+        new_post = Post(
+            title=f"Test Update Post {unique_id}",
+            slug=f"test-update-post-{unique_id}",
+            markdown_content="Original content",
+            author_id=1,
+        )
+        new_post.save()
+        post_id = new_post.id
 
         # Update without updated_on field
-        data = {"title": "Invalid Update"}
+        data = {"title": f"Updated Without Timestamp {unique_id}"}
         response = self.client.patch(
-            f"/api/v1/post/{post.id}/",
+            f"/api/v1/post/{post_id}/",
             data=json.dumps(data),
             content_type="application/json",
         )
 
         assert response.status_code == 200
         response_data = response.get_json()
-        assert response_data["title"] == "Invalid Update"
+        assert (
+            response_data["title"] == f"Updated Without Timestamp {unique_id}"
+        )
