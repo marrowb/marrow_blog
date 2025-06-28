@@ -46,7 +46,7 @@ lint:dockerfile() {
   # Lint Dockerfile
   docker container run --rm -i \
     -v "${PWD}/.hadolint.yaml:/.config/hadolint.yaml" \
-    hadolint/hadolint hadolint "${@}" - <Dockerfile
+    hadolint/hadolint hadolint - <Dockerfile
 }
 
 lint:shell() {
