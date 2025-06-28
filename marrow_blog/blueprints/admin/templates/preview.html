@@ -4,10 +4,20 @@
     <div class="preview-metadata">
         <h1>Preview: {{ post.title }}</h1>
         <div class="preview-actions">
-            <a href="{{ url_for("admin.publish", post_id=post.id) }}"
-               class="publish-btn">🚀 Publish Post
-            </button>
-            <a href="{{ url_for('admin.post', post_id=post.id) }}">← Back to Editor</a>
+            {% if not post.published %}
+                <a href="{{ url_for("admin.publish", post_id=post.id) }}"
+                   class="publish-btn">🚀 Publish Post</a>
+            {% else %}
+                <a href="{{ url_for('page.blog_post', slug=post.slug) }}" 
+                   class="view-btn" target="_blank">👁 View Live Post</a>
+                <a href="{{ url_for('admin.retract', post_id=post.id) }}" 
+                   class="retract-btn"
+                   onclick="return confirm('Are you sure you want to retract this post? It will no longer be visible to the public.');">📤 Retract Post</a>
+            {% endif %}
+            <a href="{{ url_for('admin.post', post_id=post.id) }}">✏️ Edit</a>
+            <a href="{{ url_for('admin.delete', post_id=post.id) }}" 
+               class="delete-btn"
+               onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">🗑 Delete Post</a>
         </div>
         <div class="meta-info">
             <span>Status: {{ "Published" if post.published else "Draft" }}</span>

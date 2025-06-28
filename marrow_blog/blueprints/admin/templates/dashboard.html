@@ -14,10 +14,16 @@
         <ol>
             {% for draft in drafts %}
                 <li>
-                    <a href={{ url_for("admin.post", id=draft.id) }}>
+                    <a href={{ url_for("admin.post", post_id=draft.id) }}>
                         <span>{{ draft.title }}</span>
                         <span>{{ draft.updated_on }}</span>
                     </a>
+                    <span class="post-actions">
+                        <a href="{{ url_for('admin.preview', post_id=draft.id) }}" class="btn-preview">Preview</a>
+                        <a href="{{ url_for('admin.delete', post_id=draft.id) }}" 
+                           class="btn-delete" 
+                           onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">Delete</a>
+                    </span>
                 </li>
             {% endfor %}
         </ol>
@@ -27,10 +33,20 @@
         <ol>
             {% for pub in pubs %}
                 <li>
-                    <a href={{ url_for("admin.post", id=pub.id) }}>
+                    <a href={{ url_for("admin.post", post_id=pub.id) }}>
                         <span>{{ pub.title }}</span>
                         <span>{{ pub.updated_on }}</span>
                     </a>
+                    <span class="post-actions">
+                        <a href="{{ url_for('page.blog_post', slug=pub.slug) }}" class="btn-view" target="_blank">View</a>
+                        <a href="{{ url_for('admin.preview', post_id=pub.id) }}" class="btn-preview">Preview</a>
+                        <a href="{{ url_for('admin.retract', post_id=pub.id) }}" 
+                           class="btn-retract"
+                           onclick="return confirm('Are you sure you want to retract this post? It will no longer be visible to the public.');">Retract</a>
+                        <a href="{{ url_for('admin.delete', post_id=pub.id) }}" 
+                           class="btn-delete" 
+                           onclick="return confirm('Are you sure you want to delete this post? This action cannot be undone.');">Delete</a>
+                    </span>
                 </li>
             {% endfor %}
         </ol>

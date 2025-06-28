@@ -89,6 +89,32 @@ def publish(post_id):
     return redirect(url_for("page.blog_post", slug=post.slug))
 
 
+@admin.route("/delete/<int:post_id>")
+@login_required
+def delete(post_id):
+    """Delete the post permanently."""
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    post.delete()
+    flash("Post deleted successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+
+@admin.route("/retract/<int:post_id>")
+@login_required
+def retract(post_id):
+    """Retract a published post (set to draft)."""
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    
+    if not post.published:
+        flash("Post is already a draft.", "info")
+        return redirect(url_for("admin.dashboard"))
+    
+    post.published = False
+    post.save()
+    flash("Post retracted successfully.", "success")
+    return redirect(url_for("admin.dashboard"))
+
+
 @admin.route("/upload-doc", methods=["GET", "POST"])
 @login_required
 def upload_doc():
