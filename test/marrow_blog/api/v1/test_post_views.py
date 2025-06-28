@@ -1,8 +1,6 @@
 import json
 
-from flask import url_for
-
-from lib.tests import ViewTestMixin, assert_status_with_message
+from lib.tests import ViewTestMixin
 from marrow_blog.blueprints.posts.models import Post
 
 
@@ -12,11 +10,11 @@ class TestPostViewGet(ViewTestMixin):
     def test_get_post_by_id_success(self):
         """Test GET /api/v1/post/<id> returns post data."""
         self.login_admin("test_admin")
-        
+
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         response = self.client.get(f"/api/v1/post/{post.id}/")
-        
+
         assert response.status_code == 200
         data = response.get_json()
         assert data["id"] == post.id
@@ -27,17 +25,17 @@ class TestPostViewGet(ViewTestMixin):
     def test_get_post_by_id_not_found(self):
         """Test GET /api/v1/post/<id> returns 404 for non-existent post."""
         self.login_admin("test_admin")
-        
+
         response = self.client.get("/api/v1/post/99999/")
-        
+
         assert response.status_code == 404
 
     def test_get_posts_index(self):
         """Test GET /api/v1/post/ returns list of posts."""
         self.login_admin("test_admin")
-        
+
         response = self.client.get("/api/v1/post/")
-        
+
         assert response.status_code == 200
         data = response.get_json()
         assert isinstance(data, list)
@@ -50,36 +48,36 @@ class TestPostViewCreate(ViewTestMixin):
     def test_create_post_requires_authentication(self):
         """Test POST /api/v1/post/ requires authentication."""
         data = {"title": "Unauthorized Post"}
-        
+
         response = self.client.post(
-            "/api/v1/post/", 
+            "/api/v1/post/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         # Should redirect to login or return 401
         assert response.status_code in [302, 401]
 
     def test_create_post_success(self):
         """Test POST /api/v1/post/ creates new post successfully."""
         self.login_admin("test_admin")
-        
+
         data = {
             "title": "New API Post",
-            "markdown_content": "# Content\n\nTest content"
+            "markdown_content": "# Content\n\nTest content",
         }
-        
+
         response = self.client.post(
             "/api/v1/post/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 201
         response_data = response.get_json()
         assert response_data["title"] == "New API Post"
         assert response_data["published"] is False  # Default
-        
+
         # Verify post was created in database
         created_post = Post.query.filter_by(title="New API Post").first()
         assert created_post is not None
@@ -87,15 +85,15 @@ class TestPostViewCreate(ViewTestMixin):
     def test_create_post_invalid_data(self):
         """Test POST /api/v1/post/ validates required fields."""
         self.login_admin("test_admin")
-        
+
         data = {}  # Missing required title
-        
+
         response = self.client.post(
             "/api/v1/post/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 400
         error_data = response.get_json()
         assert "error" in error_data
@@ -107,21 +105,23 @@ class TestPostViewDelete(ViewTestMixin):
     def test_delete_post_requires_authentication(self):
         """Test DELETE /api/v1/post/<id> requires authentication."""
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         response = self.client.delete(f"/api/v1/post/{post.id}/")
-        
+
         # Should redirect to login or return 401
         assert response.status_code in [302, 401]
 
     def test_delete_post_requires_author(self):
         """Test DELETE /api/v1/post/<id> requires post author."""
         # Login as different admin than post author
-        self.login_admin("test_editor")  # Different from test_admin who owns fixtures
-        
+        self.login_admin(
+            "test_editor"
+        )  # Different from test_admin who owns fixtures
+
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         response = self.client.delete(f"/api/v1/post/{post.id}/")
-        
+
         assert response.status_code == 403
         error_data = response.get_json()
         assert "Forbidden" in error_data["error"]
@@ -129,21 +129,21 @@ class TestPostViewDelete(ViewTestMixin):
     def test_delete_post_success(self):
         """Test DELETE /api/v1/post/<id> successfully deletes post."""
         self.login_admin("test_admin")  # Post author
-        
+
         # Create a post to delete (don't use fixtures to avoid affecting other tests)
         new_post = Post(
             title="Post to Delete",
             slug="post-to-delete",
             markdown_content="Content to delete",
-            author_id=1  # test_admin's ID
+            author_id=1,  # test_admin's ID
         )
         new_post.save()
         post_id = new_post.id
-        
+
         response = self.client.delete(f"/api/v1/post/{post_id}/")
-        
+
         assert response.status_code == 204
-        
+
         # Verify post was deleted from database
         deleted_post = Post.query.get(post_id)
         assert deleted_post is None
@@ -151,30 +151,30 @@ class TestPostViewDelete(ViewTestMixin):
     def test_delete_post_not_found(self):
         """Test DELETE /api/v1/post/<id> returns 404 for non-existent post."""
         self.login_admin("test_admin")
-        
+
         response = self.client.delete("/api/v1/post/99999/")
-        
+
         assert response.status_code == 404
 
     def test_delete_published_post(self):
         """Test DELETE /api/v1/post/<id> can delete published posts."""
         self.login_admin("test_admin")
-        
+
         # Create a published post to delete
         new_post = Post(
             title="Published Post to Delete",
             slug="published-post-to-delete",
             markdown_content="Published content",
             published=True,
-            author_id=1  # test_admin's ID
+            author_id=1,  # test_admin's ID
         )
         new_post.save()
         post_id = new_post.id
-        
+
         response = self.client.delete(f"/api/v1/post/{post_id}/")
-        
+
         assert response.status_code == 204
-        
+
         # Verify post was deleted
         deleted_post = Post.query.get(post_id)
         assert deleted_post is None
@@ -186,14 +186,14 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_requires_authentication(self):
         """Test PATCH /api/v1/post/<id> requires authentication."""
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         data = {"title": "Updated Title"}
         response = self.client.patch(
             f"/api/v1/post/{post.id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         # Should redirect to login or return 401
         assert response.status_code in [302, 401]
 
@@ -201,16 +201,19 @@ class TestPostViewPatch(ViewTestMixin):
         """Test PATCH /api/v1/post/<id> requires post author."""
         # Login as different admin than post author
         self.login_admin("test_editor")
-        
+
         post = Post.query.filter_by(slug="test-post-1").first()
-        
-        data = {"title": "Unauthorized Update", "updated_on": post.updated_on.isoformat()}
+
+        data = {
+            "title": "Unauthorized Update",
+            "updated_on": post.updated_on.isoformat(),
+        }
         response = self.client.patch(
             f"/api/v1/post/{post.id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 403
         error_data = response.get_json()
         assert "Forbidden" in error_data["error"]
@@ -218,33 +221,33 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_retract_published(self):
         """Test PATCH /api/v1/post/<id> can retract published post."""
         self.login_admin("test_admin")
-        
+
         # Create a published post to retract
         new_post = Post(
             title="Published Post to Retract",
             slug="published-post-to-retract",
             markdown_content="Published content",
             published=True,
-            author_id=1  # test_admin's ID
+            author_id=1,  # test_admin's ID
         )
         new_post.save()
         post_id = new_post.id
-        
+
         # Retract the post (set published=False)
         data = {
             "published": False,
-            "updated_on": new_post.updated_on.isoformat()
+            "updated_on": new_post.updated_on.isoformat(),
         }
         response = self.client.patch(
             f"/api/v1/post/{post_id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["published"] is False
-        
+
         # Verify in database
         updated_post = Post.query.get(post_id)
         assert updated_post.published is False
@@ -252,33 +255,33 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_publish_draft(self):
         """Test PATCH /api/v1/post/<id> can publish draft post."""
         self.login_admin("test_admin")
-        
+
         # Create a draft post to publish
         new_post = Post(
             title="Draft Post to Publish",
             slug="draft-post-to-publish",
             markdown_content="Draft content",
             published=False,
-            author_id=1  # test_admin's ID
+            author_id=1,  # test_admin's ID
         )
         new_post.save()
         post_id = new_post.id
-        
+
         # Publish the post (set published=True)
         data = {
             "published": True,
-            "updated_on": new_post.updated_on.isoformat()
+            "updated_on": new_post.updated_on.isoformat(),
         }
         response = self.client.patch(
             f"/api/v1/post/{post_id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["published"] is True
-        
+
         # Verify in database
         updated_post = Post.query.get(post_id)
         assert updated_post.published is True
@@ -286,21 +289,18 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_version_conflict(self):
         """Test PATCH /api/v1/post/<id> handles version conflicts."""
         self.login_admin("test_admin")
-        
+
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         # Use outdated timestamp to simulate conflict
         old_timestamp = "2020-01-01T12:00:00"
-        data = {
-            "title": "Conflicted Update",
-            "updated_on": old_timestamp
-        }
+        data = {"title": "Conflicted Update", "updated_on": old_timestamp}
         response = self.client.patch(
             f"/api/v1/post/{post.id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 409
         error_data = response.get_json()
         assert "modified since last load" in error_data["error"]
@@ -308,33 +308,33 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_partial_update(self):
         """Test PATCH /api/v1/post/<id> allows partial updates."""
         self.login_admin("test_admin")
-        
+
         # Create a post to update
         new_post = Post(
             title="Original Title",
             slug="original-slug",
             markdown_content="Original content",
-            author_id=1
+            author_id=1,
         )
         new_post.save()
         post_id = new_post.id
         original_content = new_post.markdown_content
-        
+
         # Update only title
         data = {
             "title": "Updated Title Only",
-            "updated_on": new_post.updated_on.isoformat()
+            "updated_on": new_post.updated_on.isoformat(),
         }
         response = self.client.patch(
             f"/api/v1/post/{post_id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["title"] == "Updated Title Only"
-        
+
         # Verify other fields unchanged
         updated_post = Post.query.get(post_id)
         assert updated_post.title == "Updated Title Only"
@@ -344,30 +344,33 @@ class TestPostViewPatch(ViewTestMixin):
     def test_patch_post_not_found(self):
         """Test PATCH /api/v1/post/<id> returns 404 for non-existent post."""
         self.login_admin("test_admin")
-        
-        data = {"title": "Not Found Update", "updated_on": "2024-01-01T12:00:00"}
+
+        data = {
+            "title": "Not Found Update",
+            "updated_on": "2024-01-01T12:00:00",
+        }
         response = self.client.patch(
             "/api/v1/post/99999/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 404
 
     def test_patch_post_without_updated_on(self):
         """Test PATCH /api/v1/post/<id> works without updated_on field."""
         self.login_admin("test_admin")
-        
+
         post = Post.query.filter_by(slug="test-post-1").first()
-        
+
         # Update without updated_on field
         data = {"title": "Invalid Update"}
         response = self.client.patch(
             f"/api/v1/post/{post.id}/",
             data=json.dumps(data),
-            content_type="application/json"
+            content_type="application/json",
         )
-        
+
         assert response.status_code == 200
         response_data = response.get_json()
         assert response_data["title"] == "Invalid Update"

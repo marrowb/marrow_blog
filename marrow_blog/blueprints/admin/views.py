@@ -22,11 +22,15 @@ def login():
             if user.is_mfa_enabled:
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
-                    return render_template("login.html", form=form, title="Admin Login")
+                    return render_template(
+                        "login.html", form=form, title="Admin Login"
+                    )
                 totp = pyotp.TOTP(user.mfa_secret)  # Uncomment for pyotp
                 if not totp.verify(form.token.data):
                     flash("Invalid MFA token.", "error")
-                    return render_template("login.html", form=form, title="Admin Login")
+                    return render_template(
+                        "login.html", form=form, title="Admin Login"
+                    )
                 # flash("MFA check placeholder: Successful (if token was provided and valid).", "info") # Placeholder
 
             login_user(user)
@@ -104,11 +108,11 @@ def delete(post_id):
 def retract(post_id):
     """Retract a published post (set to draft)."""
     post = Post.query.filter_by(id=post_id).first_or_404()
-    
+
     if not post.published:
         flash("Post is already a draft.", "info")
         return redirect(url_for("admin.dashboard"))
-    
+
     post.published = False
     post.save()
     flash("Post retracted successfully.", "success")
@@ -141,4 +145,6 @@ def upload_doc():
         if success and post:
             return redirect(url_for("admin.post", post_id=post.id))
 
-    return render_template("upload_doc.html", title="Upload Document", form=form)
+    return render_template(
+        "upload_doc.html", title="Upload Document", form=form
+    )
