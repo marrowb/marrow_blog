@@ -22,15 +22,11 @@ def login():
             if user.is_mfa_enabled:
                 if not form.token.data:
                     flash("MFA token is required.", "warning")
-                    return render_template(
-                        "login.html", form=form, title="Admin Login"
-                    )
+                    return render_template("login.html", form=form, title="Admin Login")
                 totp = pyotp.TOTP(user.mfa_secret)  # Uncomment for pyotp
                 if not totp.verify(form.token.data):
                     flash("Invalid MFA token.", "error")
-                    return render_template(
-                        "login.html", form=form, title="Admin Login"
-                    )
+                    return render_template("login.html", form=form, title="Admin Login")
                 # flash("MFA check placeholder: Successful (if token was provided and valid).", "info") # Placeholder
 
             login_user(user)
@@ -83,6 +79,16 @@ def preview(post_id):
     )
 
 
+@admin.route("/publish/<int:post_id>")
+@login_required
+def publish(post_id):
+    """Publish the post from the preview page."""
+    post = Post.query.filter_by(id=post_id).first_or_404()
+    post.published = True
+    post.save()
+    return redirect(url_for("page.blog_post", slug=post.slug))
+
+
 @admin.route("/upload-doc", methods=["GET", "POST"])
 @login_required
 def upload_doc():
@@ -109,6 +115,4 @@ def upload_doc():
         if success and post:
             return redirect(url_for("admin.post", post_id=post.id))
 
-    return render_template(
-        "upload_doc.html", title="Upload Document", form=form
-    )
+    return render_template("upload_doc.html", title="Upload Document", form=form)

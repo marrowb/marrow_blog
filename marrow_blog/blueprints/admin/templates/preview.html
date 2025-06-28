@@ -4,12 +4,9 @@
     <div class="preview-metadata">
         <h1>Preview: {{ post.title }}</h1>
         <div class="preview-actions">
-            <form method="POST"
-                  action="/api/v1/post/{{ post.id }}"
-                  style="display:inline">
-                <input type="hidden" name="published" value="true">
-                <button type="submit" class="publish-btn">🚀 Publish Post</button>
-            </form>
+            <a href="{{ url_for("admin.publish", post_id=post.id) }}"
+               class="publish-btn">🚀 Publish Post
+            </button>
             <a href="{{ url_for('admin.post', post_id=post.id) }}">← Back to Editor</a>
         </div>
         <div class="meta-info">
