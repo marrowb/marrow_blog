@@ -1,4 +1,19 @@
-# TODO: This will block all robots from crawling your site. You probably don't
-# want this set in production, but could be useful for a test / staging server.
 User-agent: *
-Disallow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /post/
+Disallow: /preview/
+Disallow: /publish/
+Disallow: /retract/
+Disallow: /delete/
+Disallow: /upload-doc
+Disallow: /api/
+Disallow: /up/
+
+Allow: /
+Allow: /blog/
+Allow: /rss.xml
+Allow: /sitemap.xml
+
+Sitemap: https://brandonmarrow.net/sitemap.xml
