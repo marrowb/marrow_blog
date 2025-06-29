@@ -39,7 +39,6 @@
                     </a>
                     <span class="post-actions">
                         <a href="{{ url_for('page.blog_post', slug=pub.slug) }}" class="btn-view" target="_blank">View</a>
-                        <a href="{{ url_for('admin.preview', post_id=pub.id) }}" class="btn-preview">Preview</a>
                         <a href="{{ url_for('admin.retract', post_id=pub.id) }}" 
                            class="btn-retract"
                            onclick="return confirm('Are you sure you want to retract this post? It will no longer be visible to the public.');">Retract</a>
