@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>Brandon Marrow's Blog</title>
+    <link>{{ base_url }}/</link>
+    <description>Personal blog featuring thoughts on technology, development, and life.</description>
+    <language>en-us</language>
+    <lastBuildDate>{{ build_date.strftime('%a, %d %b %Y %H:%M:%S +0000') }}</lastBuildDate>
+    <atom:link href="{{ base_url }}/rss.xml" rel="self" type="application/rss+xml" />
+    <generator>Flask Blog</generator>
+
+    {% for post in posts %}
+    <item>
+        <title>{{ post.title | e }}</title>
+        <link>{{ base_url }}/blog/{{ post.slug }}</link>
+        <description>{{ (post.excerpt or post.title) | e }}</description>
+        <pubDate>{{ post.created_on.strftime('%a, %d %b %Y %H:%M:%S +0000') }}</pubDate>
+        <guid isPermaLink="true">{{ base_url }}/blog/{{ post.slug }}</guid>
+        {% if post.tags %}
+        {% for tag in post.tag_list %}
+        <category>{{ tag | e }}</category>
+        {% endfor %}
+        {% endif %}
+    </item>
+    {% endfor %}
+</channel>
+</rss>

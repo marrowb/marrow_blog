@@ -8,6 +8,7 @@ from marrow_blog.blueprints.admin import admin
 from marrow_blog.blueprints.admin.models import AdminUser
 from marrow_blog.blueprints.api.v1.post_views import PostView
 from marrow_blog.blueprints.api.v1.upload_views import UploadView
+from marrow_blog.blueprints.feeds import feeds
 from marrow_blog.blueprints.page import page
 from marrow_blog.blueprints.up import up
 from marrow_blog.extensions import (
@@ -72,6 +73,7 @@ def create_app(settings_override=None):
     app.register_blueprint(up)
     app.register_blueprint(page)
     app.register_blueprint(admin)
+    app.register_blueprint(feeds)
 
     # Register your new PostView directly to the app for /api/v1/post routes
     PostView.register(app)
