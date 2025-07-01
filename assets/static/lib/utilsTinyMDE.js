@@ -3,23 +3,10 @@ let currentPostId = null;
 let lastKnownUpdateTime = null;
 let currentPostPublished = false;
 const saveTimeoutLength = 3000;
+let tagInput = null;
 
-// API interaction abstraction
-const apiRequest = (url, method, data = null) => {
-  const options = {
-    credentials: "include",
-    method: method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
-
-  if (data) {
-    options.body = JSON.stringify(data);
-  }
-
-  return fetch(url, options);
-};
+import { apiRequest } from "./api.js";
+import { TagInput } from "./tags.js";
 
 export const initializeTinyMDE = () => {
   const editorHostElement = document.getElementById("editor");
@@ -48,6 +35,7 @@ export const initializeTinyMDE = () => {
     }
 
     setupImageDropHandling(editor);
+    setupTagInput();
   }
 };
 
@@ -73,7 +61,7 @@ const setupEditor = (editorHostElement) => {
       }
 
       saveTimeout = setTimeout(() => {
-        savePost(editor.getContent(), title, currentPostId);
+        savePost(editor.getContent(), titleInput.value, currentPostId);
       }, saveTimeoutLength);
     });
   }
@@ -179,6 +167,10 @@ const loadPost = (postId, editor) => {
       lastKnownUpdateTime = data.updated_on;
       currentPostPublished = data.published || false;
       updatePublishedAndModified(data?.published, data?.updated_on);
+
+      if (tagInput && data.tag_list) {
+        tagInput.setTags(data.tag_list);
+      }
     })
     .catch((error) => {
       updateStatusMessage("Error loading post");
@@ -314,6 +306,10 @@ const savePost = (content, title, postID = null) => {
         const newUrl = new URL(window.location);
         newUrl.searchParams.set("id", data.id);
         window.history.pushState({}, "", newUrl);
+
+        if (tagInput) {
+          tagInput.setPostId(data.id);
+        }
       }
 
       lastKnownUpdateTime = data.updated_on;
@@ -367,6 +363,10 @@ const refreshCommandBarVisibility = () => {
     retractButton.style.display =
       currentPostId !== null && currentPostPublished === true ? "" : "none";
   }
+};
+
+const setupTagInput = () => {
+  tagInput = new TagInput("tags-input", currentPostId);
 };
 
 const setupImageDropHandling = (editor) => {
