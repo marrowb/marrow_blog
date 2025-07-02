@@ -3,6 +3,9 @@
     <link rel="stylesheet"
           type="text/css"
           href="{{ static_url_for('static', filename='styles/tiny-mde.css') }}" />
+    <link rel="stylesheet"
+          type="text/css"
+          href="{{ static_url_for('static', filename='styles/tag-input.css') }}" />
     <script type="module"
             src="{{ static_url_for('static', filename='lib/tiny-mde.min.js') }}"></script>
 {% endblock %}
@@ -18,6 +21,10 @@
                    placeholder="Post title..."
                    class="post-title-input">
         </h1>
+        <div class="tags-section">
+            <label for="tags-input">Tags:</label>
+            <div id="tags-input"></div>
+        </div>
         <span id="status-message"></span>
         <span id="status-published"></span>
         <span id="status-last-modified"></span>

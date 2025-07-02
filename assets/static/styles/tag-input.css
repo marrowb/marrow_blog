@@ -1,0 +1,88 @@
+/* Tag Input Component - Minimal Style */
+
+.tags-section {
+  margin: 1em 0;
+}
+
+.tags-section label {
+  display: block;
+  font-weight: normal;
+  margin-bottom: 0.5em;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.tag-input-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  min-height: 2.5em;
+}
+
+.tag-input-wrapper:focus-within {
+  border-color: var(--link-color);
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.25em 0.5em;
+  background-color: var(--nav-background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+}
+
+.tag-badge:hover {
+  background-color: var(--background-color);
+}
+
+.tag-remove {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background: none;
+  color: var(--text-color);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: normal;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.25em;
+}
+
+.tag-remove:hover {
+  color: var(--link-color);
+}
+
+.tag-remove:focus {
+  outline: 1px dotted var(--border-color);
+}
+
+.tag-input {
+  flex: 1;
+  min-width: 8em;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  padding: 0.25em 0;
+  color: var(--text-color);
+  font-family: var(--font-system);
+}
+
+.tag-input::placeholder {
+  color: var(--text-color-mute);
+}
