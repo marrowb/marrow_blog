@@ -96,16 +96,18 @@ const setupCommandBar = (commandBarHostElement, editor) => {
         name: "preview",
         title: "Preview Post",
         innerHTML: `<svg height="18" width="18"><path d="M9 2C5 2 1 5 1 9s4 7 8 7 8-3 8-7-4-7-8-7zm0 12c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/></svg>`,
-        action: function () {
-          if (!currentPostId) {
-            const title = document.getElementById("post-title").value;
-            const content = editor.getContent();
-            savePost(content, title, currentPostId);
-            setTimeout(() => {
-              window.location.href = `/preview/${currentPostId}`;
-            }, 500);
-          } else {
+        action: async function () {
+          if (saveTimeout) {
+            clearTimeout(saveTimeout);
+          }
+          const title = document.getElementById("post-title").value;
+          const content = editor.getContent();
+          try {
+            await savePost(content, title, currentPostId);
             window.location.href = `/preview/${currentPostId}`;
+          } catch (error) {
+            console.error("Error saving before preview:", error);
+            updateStatusMessage("Failed to save before preview");
           }
         },
         hotkey: "Mod-Shift-P",
@@ -290,7 +292,7 @@ const savePost = (content, title, postID = null) => {
     updated_on: lastKnownUpdateTime,
   };
 
-  apiRequest(url, method, postData)
+  return apiRequest(url, method, postData)
     .then((response) => {
       if (response.status === 409) {
         updateStatusMessage(
